@@ -23,6 +23,13 @@ the relevant survey program (a numeric `processid`, e.g. `6`). A raw upload star
 with a `new` file that returns a transaction ID; additional files are then attached
 to that same transaction ID. Specify the destination `folderpath` and `type(raw)`.
 
+::: {.bg-light-blue .pa3 .br2 .f6}
+**Include supporting documents:** upload the survey **documentation and
+questionnaires** together with the raw data (to the process's documents folder,
+e.g. `Doc/`), so the source instruments travel with the microdata on Datalibweb.
+Add them as additional files on the same transaction ID.
+:::
+
 Two clients are available: the [`primus` R
 package](https://github.com/worldbank/primus-r) (cross-platform) and the
 [`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows). Both

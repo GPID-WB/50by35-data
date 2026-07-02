@@ -10,6 +10,13 @@ Harmonized data files are uploaded back through PRIMUS for review. A reviewer
 checks the file against the [schema](05-schema.qmd) — mandatory variables present,
 correct types/labels, valid value ranges — before approving it.
 
+::: {.bg-light-blue .pa3 .br2 .f6}
+**Include the harmonization scripts:** upload the code used to harmonize the raw
+data (e.g. the `.do` or `.R` files) together with the harmonized dataset, to the
+**`Programs/`** folder on Datalibweb. Add them as additional files on the same
+transaction ID so the harmonization is fully reproducible from source.
+:::
+
 ## The approval workflow
 
 PRIMUS separates two roles with distinct actions:
