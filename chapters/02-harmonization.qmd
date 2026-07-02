@@ -7,7 +7,7 @@ date: today
 ## Overview
 
 Once raw microdata is available on Datalibweb, it is harmonized into the common
-**50by30 schema** (see [Schema & Variable Dictionary](05-schema.qmd)). Harmonization
+**50by30 schema** (see [Schema & Variable Dictionary](04-schema.qmd)). Harmonization
 maps survey-specific variables, codes, and units onto the mandatory and optional
 variables defined by the schema, so that welfare and self-reliance indicators are
 comparable across surveys, countries, and years.

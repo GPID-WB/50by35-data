@@ -14,12 +14,12 @@ book:
     - index.qmd
     - part: "Pipeline"
       chapters:
-        - chapters/02-raw-upload.qmd
-        - chapters/03-harmonization.qmd
-        - chapters/04-review-approval.qmd
+        - chapters/01-raw-upload.qmd
+        - chapters/02-harmonization.qmd
+        - chapters/03-review-approval.qmd
     - part: "Reference"
       chapters:
-        - chapters/05-schema.qmd
+        - chapters/04-schema.qmd
 
 bibliography: references.bib
 

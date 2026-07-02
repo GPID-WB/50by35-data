@@ -7,7 +7,7 @@ date: today
 ## Overview
 
 Harmonized data files are uploaded back through PRIMUS for review. A reviewer
-checks the file against the [schema](05-schema.qmd) — mandatory variables present,
+checks the file against the [schema](04-schema.qmd) — mandatory variables present,
 correct types/labels, valid value ranges — before approving it.
 
 ::: {.bg-light-blue .pa3 .br2 .f6}

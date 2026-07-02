@@ -127,4 +127,4 @@ primus register, token(<your Datalibweb token>)
 ## Outcome
 
 Once confirmed, the raw transaction is queued for the relevant reviewers. Approved
-raw files become the input to the [harmonization step](03-harmonization.qmd).
+raw files become the input to the [harmonization step](02-harmonization.qmd).

@@ -29,17 +29,17 @@ flowchart LR
 
 The pipeline has three steps:
 
-1. **[Raw data](chapters/02-raw-upload.qmd)** — raw survey microdata is uploaded
+1. **[Raw data](chapters/01-raw-upload.qmd)** — raw survey microdata is uploaded
    to Datalibweb via **PRIMUS**, unless it is already available there.
-2. **[Harmonization](chapters/03-harmonization.qmd)** — raw data is harmonized to
+2. **[Harmonization](chapters/02-harmonization.qmd)** — raw data is harmonized to
    the common 50by30 schema.
-3. **[Upload, review & approval](chapters/04-review-approval.qmd)** — harmonized
+3. **[Upload, review & approval](chapters/03-review-approval.qmd)** — harmonized
    files are uploaded and reviewed; approved files are published and made available
    for distribution from Datalibweb.
 
 ## Core Harmonized Schema
 
-Every harmonized file must conform to the [50by30 schema](chapters/05-schema.qmd).
+Every harmonized file must conform to the [50by30 schema](chapters/04-schema.qmd).
 The core variables are:
 
 | Variable | Status | Description |
@@ -50,7 +50,7 @@ The core variables are:
 | `age` | Optional | Age of the individual, in years |
 | `educat4` | Optional | Educational attainment, 4-category classification |
 
-See the [Schema & Variable Dictionary](chapters/05-schema.qmd) for the full list,
+See the [Schema & Variable Dictionary](chapters/04-schema.qmd) for the full list,
 value ranges, and labeling conventions.
 
 ::: {.bg-light-yellow .pa3 .br2 .f6}
