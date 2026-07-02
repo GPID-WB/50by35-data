@@ -6,7 +6,7 @@ date: today
 
 ## Overview
 
-Before a survey can be harmonized, its raw microdata must exist on **Datalibweb**.
+Before a survey can be harmonized, its raw microdata should exist on **Datalibweb**.
 If a raw dataset is not already available there, it must first be uploaded through
 **PRIMUS** (Primary Review of Indicators and Microdata Upload System), the World Bank
 platform for uploading, reviewing, and approving microdata prior to publication.
@@ -18,10 +18,19 @@ already present before starting a new upload transaction.
 
 ## Uploading via PRIMUS
 
-Raw files are uploaded as a PRIMUS **transaction**, using the `RAWPROC` process (or
-the process assigned to the relevant survey program). The [`primus` R
-package](https://github.com/worldbank/primus-r) is the recommended client for
-scripted uploads; see its `docs/` folder for the full PRIMUS user manuals.
+Raw files are uploaded as a PRIMUS **transaction** against the process assigned to
+the relevant survey program (a numeric `processid`, e.g. `6`). A raw upload starts
+with a `new` file that returns a transaction ID; additional files are then attached
+to that same transaction ID. Specify the destination `folderpath` and `type(raw)`.
+
+Two clients are available: the [`primus` R
+package](https://github.com/worldbank/primus-r) (cross-platform) and the
+[`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows). Both
+call the same PRIMUS API; use whichever matches your harmonization workflow.
+
+::: {.panel-tabset}
+
+## R
 
 ```r
 library(primus)
@@ -55,12 +64,58 @@ primus_upload(
 primus_confirm(up$transaction_id)
 ```
 
+## Stata
+
+```stata
+* Upload a raw data file as a NEW transaction; the transaction ID is returned
+primus upload, processid(6) surveyid(AGO_2029_HBS_V01_M) ///
+    type(raw) folderpath(Data/Stata) infile(c:\Temp\subin.dta) new
+
+* Add other files to the SAME transaction ID reported above
+primus upload, proc(6) surveyid(AGO_2029_HBS_V01_M) ///
+    type(raw) folderpath(Data/Stata) infile(c:\Temp\spatial_deflators.dta) ///
+    tranxid(006-000327173-MNARAW-AGO-12944)
+
+* Alternatively, upload a zip that mirrors the process folder structure
+primus upload, processid(6) surveyid(AGO_2029_HBS_V01_M) ///
+    type(raw) infile(c:\Temp\AGO_2029_HBS_v01_M.zip) zip new
+
+* Confirm the draft transaction (uploader step)
+primus action, tranxid(006-000327173-MNARAW-AGO-12944) proc(6) ///
+    decision(confirm) comments(raw data ready for review)
+```
+
+:::
+
 ## Authentication
 
+Both clients use the same **Datalibweb token** (valid 30 days, renewed on the
+Datalibweb website).
+
+::: {.panel-tabset}
+
+## R
+
 `primus` defaults to the **plugin gateway**, which reuses the same Datalibweb bearer
-token as the `dlw` R package (valid 30 days, renewed on the Datalibweb website). See
-the `primus` package's `authentication` vignette for the Azure AD gateway, used only
-for endpoints not exposed on the plugin gateway.
+token as the `dlw` R package. Store it once (shared with `dlw`):
+
+```r
+primus_set_token("<your Datalibweb token>")
+```
+
+See the package's `authentication` vignette for the Azure AD gateway, used only for
+endpoints not exposed on the plugin gateway.
+
+## Stata
+
+Register the token copied from the Datalibweb website before running PRIMUS
+commands:
+
+```stata
+primus register, token(<your Datalibweb token>)
+```
+
+:::
 
 ## Outcome
 

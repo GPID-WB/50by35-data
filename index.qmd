@@ -8,15 +8,71 @@ This book documents the data pipeline used to **harmonize, upload, review, and
 distribute** microdata used to monitor the UNHCR **50by30 vision**: that 50 percent
 of refugees in protracted crises are self-reliant by 2035.
 
+## The Pipeline at a Glance
+
+```{mermaid}
+%%| label: fig-pipeline
+%%| fig-cap: "The 50by30 microdata pipeline, from raw survey to distribution."
+flowchart TB
+    src([Survey producer<br/>raw microdata])
+
+    subgraph s1 ["1 · Raw upload"]
+        direction TB
+        chk{Already on<br/>Datalibweb?}
+        up1[primus upload<br/>type=raw]
+        chk -->|no| up1
+    end
+
+    subgraph s2 ["2 · Harmonization"]
+        direction TB
+        harm[Map to 50by30 schema<br/>welfare · welfare_self · weight]
+    end
+
+    subgraph s3 ["3 · Upload, review &amp; approval"]
+        direction TB
+        up2[primus upload<br/>harmonized file]
+        rev{Reviewer}
+        up2 --> rev
+    end
+
+    dist[(Datalibweb<br/>approved &amp; distributed)]
+
+    src --> chk
+    chk -->|yes| harm
+    up1 --> harm
+    harm --> up2
+    rev -->|approve| dist
+    rev -->|reject| harm
+
+    classDef store fill:#e8f0fe,stroke:#4285f4,color:#174ea6;
+    class dist store;
+```
+
 The pipeline has three steps:
 
-1. **Raw upload** — raw survey microdata is uploaded to Datalibweb via
-   [PRIMUS](https://github.com/worldbank/primus-r), unless already available there.
-2. **Harmonization** — raw data is harmonized to the common
-   [50by30 schema](chapters/05-schema.qmd).
-3. **Upload, review & approval** — harmonized files are uploaded and reviewed;
-   approved files are published and made available for distribution from
-   Datalibweb.
+1. **[Raw upload](chapters/02-raw-upload.qmd)** — raw survey microdata is uploaded
+   to Datalibweb via **PRIMUS**, unless it is already available there.
+2. **[Harmonization](chapters/03-harmonization.qmd)** — raw data is harmonized to
+   the common 50by30 schema.
+3. **[Upload, review & approval](chapters/04-review-approval.qmd)** — harmonized
+   files are uploaded and reviewed; approved files are published and made available
+   for distribution from Datalibweb.
+
+## Core Harmonized Schema
+
+Every harmonized file must conform to the [50by30 schema](chapters/05-schema.qmd).
+The core variables are:
+
+| Variable | Status | Description |
+|---|---|---|
+| `welfare` | **Mandatory** | Household welfare aggregate (consumption or income) |
+| `welfare_self` | **Mandatory** | Self-reliance-adjusted welfare measure |
+| `weight` | **Mandatory** | Sampling weight |
+| `age` | Optional | Age of the individual, in years |
+| `educat4` | Optional | Educational attainment, 4-category classification |
+
+See the [Schema & Variable Dictionary](chapters/05-schema.qmd) for the full list,
+value ranges, and labeling conventions.
 
 ::: {.bg-light-yellow .pa3 .br2 .f6}
 **Status:** This is a living document under active development.

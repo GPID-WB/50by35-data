@@ -10,23 +10,82 @@ Harmonized data files are uploaded back through PRIMUS for review. A reviewer
 checks the file against the [schema](05-schema.qmd) — mandatory variables present,
 correct types/labels, valid value ranges — before approving it.
 
+## The approval workflow
+
+PRIMUS separates two roles with distinct actions:
+
+1. **Uploader → `CONFIRM`** — after uploading, the uploader confirms the draft
+   transaction. Only then does it become visible to approvers.
+2. **Approver → `APPROVE` or `REJECT`** — an authorized approver acts on the
+   confirmed transaction. Comments are **required** for a rejection.
+
+A rejected transaction goes back for correction and re-upload; an approved one is
+published to Datalibweb.
+
+::: {.bg-washed-red .pa3 .br2 .ba .b--light-red .f6}
+**Note:** A transaction cannot be approved or rejected more than once, and the
+action cannot be changed once it goes through.
+:::
+
+## Acting on a transaction
+
+::: {.panel-tabset}
+
+## R
+
 ```r
 library(primus)
 
-# Upload the harmonized file
-up <- primus_upload(
-  process_name = "GMD",
-  survey_id    = "AGO_2029_HBS_V01_M",
-  type         = "harmonized",
-  infile       = "ago_2029_hbs_harmonized.dta",
-  folder_name  = "Data/Stata"
-)
-primus_confirm(up$transaction_id)
+# Uploader confirms the draft transaction
+primus_confirm("006-000327173-MNARAW-AGO-536ce")
 
-# Reviewer actions
-primus_approve(up$transaction_id)
-primus_reject(up$transaction_id, comments = "welfare variable missing labels")
+# Approver approves ...
+primus_approve("006-000327173-MNARAW-ALB-8ef53")
+
+# ... or rejects (comments required)
+primus_reject(
+  "007-000327173-MNAPOV-DJI-24674",
+  comments = "welfare variable missing labels"
+)
 ```
+
+## Stata
+
+```stata
+* Uploader confirms the draft transaction
+primus action, tranxid(006-000327173-MNARAW-AGO-536ce) proc(6) ///
+    decision(confirm) comments(harmonized file ready)
+
+* Approver approves ...
+primus action, tranxid(006-000327173-MNARAW-ALB-8ef53) proc(6) ///
+    decision(approve) comments(ok to approve)
+
+* ... or rejects (comments required)
+primus action, tranxid(007-000327173-MNAPOV-DJI-24674) proc(7) ///
+    decision(reject) comments(welfare variable missing labels)
+```
+
+:::
+
+## Tracking status
+
+Query outstanding transactions to see what is pending review.
+
+::: {.panel-tabset}
+
+## R
+
+```r
+primus_query_transactions(process_name = "GMD", status = "pending")
+```
+
+## Stata
+
+```stata
+primus query, process(6) overallstatus(PENDING)
+```
+
+:::
 
 ## Outcome
 
