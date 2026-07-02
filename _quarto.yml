@@ -12,9 +12,6 @@ book:
   repo-actions: [edit, issue]
   chapters:
     - index.qmd
-    - part: "Overview"
-      chapters:
-        - chapters/01-introduction.qmd
     - part: "Pipeline"
       chapters:
         - chapters/02-raw-upload.qmd

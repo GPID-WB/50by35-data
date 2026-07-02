@@ -11,23 +11,80 @@ this schema. Variables are grouped into **mandatory** (must be present and
 non-missing per the rules of the variable) and **optional** (included when
 available in the source survey).
 
+The **unit of observation** is the individual: one row per person, with
+household-level variables (e.g. `welfare`, `weight`, `hhid`) repeated across all
+members of the same household.
+
+## Conventions
+
+- **Type** refers to the Stata storage type of the variable in the harmonized
+  `.dta` file: `str#` (string), `byte`/`int`/`long` (integers), `float`/`double`
+  (reals). Read the equivalents in R (`character`, `integer`, `double`) via
+  [`haven`](https://haven.tidyverse.org).
+- **Missing** — mandatory variables may not be missing except where noted. Use
+  Stata's system missing (`.`) for genuinely unknown values; do not use numeric
+  sentinels such as `-9` or `99`.
+- **Labels** — categorical variables must carry Stata value labels; the numeric
+  codes below are authoritative and must match across all surveys.
+- **Identifiers** are strings to preserve leading zeros and avoid precision loss.
+
 ## Mandatory Variables
 
-| Variable | Description |
-|---|---|
-| `welfare` | Household welfare aggregate (consumption or income), as defined by the survey's official poverty methodology |
-| `welfare_self` | Self-reliance-adjusted welfare measure |
-| `weight` | Sampling weight |
+| Variable | Label | Type | Unit / range | Missing | Notes |
+|---|---|---|---|---|---|
+| `hhid` | Household identifier | `str` | — | Not allowed | Unique per household within the survey; string to preserve leading zeros |
+| `pid` | Person identifier | `str` | — | Not allowed | Unique per individual within the survey |
+| `welfare` | Welfare aggregate | `double` | ≥ 0, LCU, annual per capita | Not allowed | Consumption or income aggregate from the survey's official poverty methodology; `welfare_type` records which |
+| `welfare_type` | Welfare measure type | `byte` | `1`–`3` | Not allowed | `1` = Consumption, `2` = Income, `3` = Expenditure |
+| `welfare_self` | Self-reliance-adjusted welfare | `double` | ≥ 0, LCU, annual per capita | Not allowed | Welfare measure used for the 50by30 self-reliance indicator |
+| `weight` | Sampling weight | `double` | > 0 | Not allowed | Individual sampling/population weight |
+| `weight_type` | Weight type | `byte` | `1`–`2` | Not allowed | `1` = Frequency weight (FW), `2` = Probability weight (PW) |
+| `hsize` | Household size | `int` | ≥ 1 | Not allowed | Number of household members |
+| `countrycode` | Country code | `str3` | ISO / WDI 3-letter | Not allowed | e.g. `AGO`, `ETH` |
+| `year` | Survey year | `int` | 1990–2035 | Not allowed | Four-digit year of data collection |
 
 ## Optional Variables
 
-| Variable | Description |
-|---|---|
-| `age` | Age of the individual, in years |
-| `educat4` | Educational attainment, 4-category classification |
+| Variable | Label | Type | Unit / range | Notes |
+|---|---|---|---|---|
+| `age` | Age | `double` | 0–120 years | Decimal allowed for children under 5 (per GMD 2.0); integer otherwise |
+| `male` | Sex | `byte` | `0`–`1` | `0` = Female, `1` = Male |
+| `urban` | Urban/rural | `byte` | `0`–`1` | `0` = Rural, `1` = Urban |
+| `educat4` | Education (4 cat.) | `byte` | `1`–`4` | See value labels below |
+| `empstat` | Employment status | `byte` | `1`–`4` | `1` = Employed, `2` = Unemployed, `3` = Out of labor force, `4` = Not applicable |
+| `strata` | Sampling strata | `int` | — | Design variable for variance estimation |
+| `psu` | Primary sampling unit | `long` | — | Design variable for variance estimation |
+
+## Value Labels
+
+Categorical variables must use these codes and labels exactly.
+
+`welfare_type`
+
+: `1` Consumption · `2` Income · `3` Expenditure
+
+`weight_type`
+
+: `1` Frequency weight (FW) · `2` Probability weight (PW)
+
+`male`
+
+: `0` Female · `1` Male
+
+`urban`
+
+: `0` Rural · `1` Urban
+
+`educat4`
+
+: `1` No education · `2` Primary · `3` Secondary · `4` Tertiary
+
+`empstat`
+
+: `1` Employed · `2` Unemployed · `3` Out of labor force · `4` Not applicable
 
 ::: {.bg-light-yellow .pa3 .br2 .f6}
-**Status:** This variable dictionary is a starting point. Add full definitions,
-allowed value ranges, units, and labeling conventions for each variable as they
-are finalized.
+**Status:** This variable dictionary is a working draft. Confirm the final variable
+list, value-label codes, and the precise definition of `welfare_self` with the
+50by30 methodology team before treating it as authoritative.
 :::

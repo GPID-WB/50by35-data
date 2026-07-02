@@ -13,38 +13,21 @@ of refugees in protracted crises are self-reliant by 2035.
 ```{mermaid}
 %%| label: fig-pipeline
 %%| fig-cap: "The 50by30 microdata pipeline, from raw survey to distribution."
-flowchart TB
-    src([Survey producer<br/>raw microdata])
+flowchart LR
+    raw["<b>1 · Raw upload</b><br/>PRIMUS · type=raw"]
+    harm["<b>2 · Harmonization</b><br/>map to 50by30 schema"]
+    rev{"<b>3 · Review</b>"}
+    dist[("Datalibweb<br/>distributed")]
 
-    subgraph s1 ["1 · Raw upload"]
-        direction TB
-        chk{Already on<br/>Datalibweb?}
-        up1[primus upload<br/>type=raw]
-        chk -->|no| up1
-    end
-
-    subgraph s2 ["2 · Harmonization"]
-        direction TB
-        harm[Map to 50by30 schema<br/>welfare · welfare_self · weight]
-    end
-
-    subgraph s3 ["3 · Upload, review &amp; approval"]
-        direction TB
-        up2[primus upload<br/>harmonized file]
-        rev{Reviewer}
-        up2 --> rev
-    end
-
-    dist[(Datalibweb<br/>approved &amp; distributed)]
-
-    src --> chk
-    chk -->|yes| harm
-    up1 --> harm
-    harm --> up2
+    raw --> harm --> rev
     rev -->|approve| dist
     rev -->|reject| harm
 
-    classDef store fill:#e8f0fe,stroke:#4285f4,color:#174ea6;
+    classDef step fill:#e8f0fe,stroke:#4285f4,color:#174ea6;
+    classDef gate fill:#fef7e0,stroke:#f9ab00,color:#7f6003;
+    classDef store fill:#e6f4ea,stroke:#34a853,color:#0d652d;
+    class raw,harm step;
+    class rev gate;
     class dist store;
 ```
 
