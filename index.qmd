@@ -8,9 +8,15 @@ This book documents the data pipeline used to **harmonize, upload, review, and
 distribute** microdata used to monitor the UNHCR **50by30 vision**: that 50 percent
 of refugees in protracted crises are self-reliant by 2035.
 
-It covers the pipeline architecture, data harmonization procedures, upload and
-storage conventions, review and quality-assurance steps, and distribution
-mechanisms for the underlying microdata.
+The pipeline has three steps:
+
+1. **Raw upload** — raw survey microdata is uploaded to Datalibweb via
+   [PRIMUS](https://github.com/worldbank/primus-r), unless already available there.
+2. **Harmonization** — raw data is harmonized to the common
+   [50by30 schema](chapters/05-schema.qmd).
+3. **Upload, review & approval** — harmonized files are uploaded and reviewed;
+   approved files are published and made available for distribution from
+   Datalibweb.
 
 ::: {.bg-light-yellow .pa3 .br2 .f6}
 **Status:** This is a living document under active development.

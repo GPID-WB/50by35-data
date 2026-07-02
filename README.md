@@ -1,7 +1,7 @@
 # 50by30 Microdata Pipeline
 
 This repository contains the Quarto book documenting the data pipeline used to
-**harmonize, upload, review, and distribute** microdata used to monitor the
+**harmonize, upload, review, and access** microdata used to monitor the
 UNHCR **50by30 vision**: that 50% of refugees in protracted crises are
 self-reliant by 2035.
 

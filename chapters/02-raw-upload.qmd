@@ -1,0 +1,68 @@
+---
+title: "Raw Data Upload"
+author: "World Bank / UNHCR Joint Team"
+date: today
+---
+
+## Overview
+
+Before a survey can be harmonized, its raw microdata must exist on **Datalibweb**.
+If a raw dataset is not already available there, it must first be uploaded through
+**PRIMUS** (Primary Review of Indicators and Microdata Upload System), the World Bank
+platform for uploading, reviewing, and approving microdata prior to publication.
+
+::: {.bg-light-blue .pa3 .br2 .f6}
+**Check first:** query Datalibweb / PRIMUS to confirm whether the raw survey is
+already present before starting a new upload transaction.
+:::
+
+## Uploading via PRIMUS
+
+Raw files are uploaded as a PRIMUS **transaction**, using the `RAWPROC` process (or
+the process assigned to the relevant survey program). The [`primus` R
+package](https://github.com/worldbank/primus-r) is the recommended client for
+scripted uploads; see its `docs/` folder for the full PRIMUS user manuals.
+
+```r
+library(primus)
+
+# Discover the processes you can act on
+primus_list_processes()
+
+# What folders / extensions does the process accept?
+primus_folders(process_name = "RAWPROC")
+
+# Upload a raw data file (creates a new transaction)
+up <- primus_upload(
+  process_name = "RAWPROC",
+  survey_id    = "AGO_2029_HBS_V01_M",
+  type         = "raw",
+  infile       = "subin.dta",
+  folder_name  = "Data/Stata"
+)
+
+# Add additional files to the same transaction
+primus_upload(
+  process_name   = "RAWPROC",
+  survey_id      = "AGO_2029_HBS_V01_M",
+  type           = "raw",
+  infile         = "deflators.dta",
+  folder_name    = "Data/Stata",
+  transaction_id = up$transaction_id
+)
+
+# Confirm the draft transaction once all files are attached
+primus_confirm(up$transaction_id)
+```
+
+## Authentication
+
+`primus` defaults to the **plugin gateway**, which reuses the same Datalibweb bearer
+token as the `dlw` R package (valid 30 days, renewed on the Datalibweb website). See
+the `primus` package's `authentication` vignette for the Azure AD gateway, used only
+for endpoints not exposed on the plugin gateway.
+
+## Outcome
+
+Once confirmed, the raw transaction is queued for the relevant reviewers. Approved
+raw files become the input to the [harmonization step](03-harmonization.qmd).

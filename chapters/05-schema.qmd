@@ -1,0 +1,33 @@
+---
+title: "Schema & Variable Dictionary"
+author: "World Bank / UNHCR Joint Team"
+date: today
+---
+
+## Overview
+
+Every harmonized file uploaded and approved through the pipeline must conform to
+this schema. Variables are grouped into **mandatory** (must be present and
+non-missing per the rules of the variable) and **optional** (included when
+available in the source survey).
+
+## Mandatory Variables
+
+| Variable | Description |
+|---|---|
+| `welfare` | Household welfare aggregate (consumption or income), as defined by the survey's official poverty methodology |
+| `welfare_self` | Self-reliance-adjusted welfare measure |
+| `weight` | Sampling weight |
+
+## Optional Variables
+
+| Variable | Description |
+|---|---|
+| `age` | Age of the individual, in years |
+| `educat4` | Educational attainment, 4-category classification |
+
+::: {.bg-light-yellow .pa3 .br2 .f6}
+**Status:** This variable dictionary is a starting point. Add full definitions,
+allowed value ranges, units, and labeling conventions for each variable as they
+are finalized.
+:::

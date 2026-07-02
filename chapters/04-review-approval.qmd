@@ -1,0 +1,34 @@
+---
+title: "Upload, Review & Approval"
+author: "World Bank / UNHCR Joint Team"
+date: today
+---
+
+## Overview
+
+Harmonized data files are uploaded back through PRIMUS for review. A reviewer
+checks the file against the [schema](05-schema.qmd) — mandatory variables present,
+correct types/labels, valid value ranges — before approving it.
+
+```r
+library(primus)
+
+# Upload the harmonized file
+up <- primus_upload(
+  process_name = "GMD",
+  survey_id    = "AGO_2029_HBS_V01_M",
+  type         = "harmonized",
+  infile       = "ago_2029_hbs_harmonized.dta",
+  folder_name  = "Data/Stata"
+)
+primus_confirm(up$transaction_id)
+
+# Reviewer actions
+primus_approve(up$transaction_id)
+primus_reject(up$transaction_id, comments = "welfare variable missing labels")
+```
+
+## Outcome
+
+Only **approved** harmonized files are published and made available for
+distribution from Datalibweb.
