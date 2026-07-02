@@ -2,11 +2,7 @@
 title: "50by30 Microdata Pipeline"
 ---
 
-## About This Document
-
-This book documents the data pipeline used to **harmonize, upload, review, and
-distribute** microdata used to monitor the UNHCR **50by30 vision**: that 50 percent
-of refugees in protracted crises are self-reliant by 2035.
+This book documents the data pipeline used to **harmonize, upload, review, and distribute** microdata used to monitor the UNHCR **50by30 vision**: that 50 percent of refugees in protracted crises are self-reliant by 2035.
 
 ## The Pipeline at a Glance
 
@@ -14,7 +10,7 @@ of refugees in protracted crises are self-reliant by 2035.
 %%| label: fig-pipeline
 %%| fig-cap: "The 50by30 microdata pipeline, from raw survey to distribution."
 flowchart LR
-    raw["<b>1 · Raw upload</b><br/>PRIMUS · type=raw"]
+    raw["<b>1 · Raw data</b><br/>PRIMUS · type=raw"]
     harm["<b>2 · Harmonization</b><br/>map to 50by30 schema"]
     rev{"<b>3 · Review</b>"}
     dist[("Datalibweb<br/>distributed")]
@@ -33,7 +29,7 @@ flowchart LR
 
 The pipeline has three steps:
 
-1. **[Raw upload](chapters/02-raw-upload.qmd)** — raw survey microdata is uploaded
+1. **[Raw data](chapters/02-raw-upload.qmd)** — raw survey microdata is uploaded
    to Datalibweb via **PRIMUS**, unless it is already available there.
 2. **[Harmonization](chapters/03-harmonization.qmd)** — raw data is harmonized to
    the common 50by30 schema.
