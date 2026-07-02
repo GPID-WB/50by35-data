@@ -1,0 +1,90 @@
+name: Publish Quarto Book to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # 1. Check out repository (with full history for freeze cache)
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # 2. Install Quarto
+      - name: Install Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: "1.5.57"
+
+      # 3. Set up R
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.4.0"
+          use-public-rspm: true
+
+      # 4. Restore R package cache
+      - name: Cache R packages
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-${{ hashFiles('renv.lock') }}
+          restore-keys: ${{ runner.os }}-r-
+
+      # 5. Install R dependencies
+      #    - If renv.lock exists: restore from it (exact version pinning)
+      #    - Otherwise: install the standard package set directly
+      - name: Install R dependencies
+        run: |
+          if (file.exists("renv.lock")) {
+            message("renv.lock found — restoring via renv")
+            install.packages("renv")
+            renv::restore()
+          } else {
+            message("No renv.lock — installing packages directly")
+            install.packages(c(
+              "tidyverse", "haven", "knitr", "gt", "ggplot2", "scales", "here"
+            ))
+          }
+        shell: Rscript {0}
+
+      # 6. Set up GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      # 7. Render the book
+      #    Stata is NOT installed on the runner.
+      #    All Stata outputs must be frozen locally before pushing.
+      #    `freeze: auto` in _quarto.yml ensures frozen outputs are used.
+      - name: Render Quarto book
+        run: quarto render
+
+      # 8. Upload rendered site as a Pages artifact
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+
+      # 9. Deploy to GitHub Pages via the Pages API (no gh-pages branch needed)
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

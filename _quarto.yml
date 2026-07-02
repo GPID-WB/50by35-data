@@ -1,0 +1,41 @@
+project:
+  type: book
+  output-dir: docs   # GitHub Pages serves from /docs on main branch
+
+book:
+  title: "50by30 Microdata Pipeline"
+  subtitle: "Harmonizing, Uploading, Reviewing, and Distributing Microdata for the UNHCR 50by30 Vision"
+  date: today
+  author:
+    - name: "World Bank / UNHCR Joint Team"
+  repo-url: https://github.com/GPID-WB/50by30-data
+  repo-actions: [edit, issue]
+  chapters:
+    - index.qmd
+    - part: "Overview"
+      chapters:
+        - chapters/01-introduction.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    include-in-header:
+      - text: |
+          <link rel="stylesheet"
+                href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+
+execute:
+  freeze: auto                # cache all outputs; re-execute only when source changes
+  echo: true
+  warning: false
+
+knitr:
+  opts_chunk:
+    comment: "#>"

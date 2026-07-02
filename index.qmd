@@ -1,0 +1,18 @@
+---
+title: "50by30 Microdata Pipeline"
+---
+
+## About This Document
+
+This book documents the data pipeline used to **harmonize, upload, review, and
+distribute** microdata used to monitor the UNHCR **50by30 vision**: that 50 percent
+of refugees in protracted crises are self-reliant by 2035.
+
+It covers the pipeline architecture, data harmonization procedures, upload and
+storage conventions, review and quality-assurance steps, and distribution
+mechanisms for the underlying microdata.
+
+::: {.bg-light-yellow .pa3 .br2 .f6}
+**Status:** This is a living document under active development.
+See the [contributor guide](wiki/contributing.md) before making changes.
+:::
