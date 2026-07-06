@@ -2,40 +2,52 @@
 title: "50by30 Microdata Pipeline"
 ---
 
-This book documents the data pipeline used to **harmonize, upload, review, and distribute** microdata used to monitor the UNHCR **50by30 vision**: that 50 percent of refugees in protracted crises are self-reliant by 2035.
+::: {.callout-important}
+## Status
+This is a living document under active development.
+See the [contributor guide](wiki/contributing.md) before making changes.
+:::
+
+
+This book documents the data pipeline used to **harmonize, upload, review, and publish** microdata used to monitor the UNHCR **50by30 vision**: that 50 percent of refugees in protracted crises are self-reliant by 2035.
 
 ## The Pipeline at a Glance
 
 ```{mermaid}
 %%| label: fig-pipeline
-%%| fig-cap: "The 50by30 microdata pipeline, from raw survey to distribution."
+%%| fig-cap: "The 50by30 microdata pipeline"
+%%| fig-width: 8
 flowchart LR
-    raw["<b>1 · Raw data</b><br/>PRIMUS · type=raw"]
-    harm["<b>2 · Harmonization</b><br/>map to 50by30 schema"]
-    rev{"<b>3 · Review</b>"}
-    dist[("Datalibweb<br/>distributed")]
+    raw["<b>1 · Upload<br/>raw<br/>data</b>"]
+    rawrev{"<b>2 · Review</b>"}
+    dlwraw[("<b>datalibweb</b><br/>FDPRAW")]
+    harm["<b>3 · Harmonize data</b><br/>50by30 schema"]
+    hup["<b>4 · Upload<br/>harmonized<br/>data</b>"]
+    hrev{"<b>5 · Review</b>"}
+    dlw[("<b>datalibweb</b><br/>FDP")]
 
-    raw --> harm --> rev
-    rev -->|approve| dist
-    rev -->|reject| harm
+    raw --> rawrev
+    rawrev -->|approve| dlwraw
+    rawrev -->|reject| raw
+    dlwraw --> harm
+    harm --> hup
+    hup --> hrev
+    hrev -->|approve| dlw
+    hrev -->|reject| harm
 
     classDef step fill:#e8f0fe,stroke:#4285f4,color:#174ea6;
     classDef gate fill:#fef7e0,stroke:#f9ab00,color:#7f6003;
     classDef store fill:#e6f4ea,stroke:#34a853,color:#0d652d;
-    class raw,harm step;
-    class rev gate;
-    class dist store;
+    class raw,harm,hup step;
+    class rawrev,hrev gate;
+    class dlwraw,dlw store;
 ```
 
-The pipeline has three steps:
+The pipeline is documented here in three parts:
 
-1. **[Raw data](chapters/01-raw-upload.qmd)** — raw survey microdata is uploaded
-   to Datalibweb via **PRIMUS**, unless it is already available there.
-2. **[Harmonization](chapters/02-harmonization.qmd)** — raw data is harmonized to
-   the common 50by30 schema.
-3. **[Upload, review & approval](chapters/03-review-approval.qmd)** — harmonized
-   files are uploaded and reviewed; approved files are published and made available
-   for distribution from Datalibweb.
+1. **[Upload Raw Data](chapters/01-raw-upload.qmd)** — raw microdata and documentation are uploaded via **PRIMUS**, unless it is already available from **datalibweb**.
+2. **[Harmonize Data](chapters/02-harmonization.qmd)** — approved raw data is harmonized to the 50by30 schema.
+3. **[Upload Harmonized Data](chapters/03-review-approval.qmd)** — harmonized microdata and harmonization scripts are uploaded via **PRIMUS**. Approved files are published to **datalibweb** for 50by30 monitoring.
 
 ## Core Harmonized Schema
 
@@ -47,13 +59,7 @@ The core variables are:
 | `welfare` | **Mandatory** | Household welfare aggregate (consumption or income) |
 | `welfare_self` | **Mandatory** | Self-reliance-adjusted welfare measure |
 | `weight` | **Mandatory** | Sampling weight |
-| `age` | Optional | Age of the individual, in years |
-| `educat4` | Optional | Educational attainment, 4-category classification |
 
 See the [Schema & Variable Dictionary](chapters/04-schema.qmd) for the full list,
 value ranges, and labeling conventions.
 
-::: {.bg-light-yellow .pa3 .br2 .f6}
-**Status:** This is a living document under active development.
-See the [contributor guide](wiki/contributing.md) before making changes.
-:::

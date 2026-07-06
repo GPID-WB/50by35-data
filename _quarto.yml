@@ -4,7 +4,7 @@ project:
 
 book:
   title: "50by30 Microdata Pipeline"
-  subtitle: "Harmonizing, Uploading, Reviewing, and Distributing Microdata for the UNHCR 50by30 Vision"
+  subtitle: "Harmonize and publish microdata used to monitor the UNHCR 50by30 Vision"
   date: today
   author:
     - name: "World Bank / UNHCR Joint Team"
@@ -31,10 +31,6 @@ format:
     number-sections: true
     code-fold: true
     code-tools: true
-    include-in-header:
-      - text: |
-          <link rel="stylesheet"
-                href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
 
 execute:
   freeze: auto                # cache all outputs; re-execute only when source changes

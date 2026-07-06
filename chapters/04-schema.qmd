@@ -4,6 +4,13 @@ author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
+::: {.callout-important}
+## Status
+This variable dictionary is a working draft. Confirm the final variable
+list, value-label codes, and the precise definition of `welfare_self` with the
+50by30 methodology team before treating it as authoritative.
+:::
+
 ## Overview
 
 Every harmonized file uploaded and approved through the pipeline must conform to
@@ -12,7 +19,7 @@ non-missing per the rules of the variable) and **optional** (included when
 available in the source survey).
 
 The **unit of observation** is the individual: one row per person, with
-household-level variables (e.g. `welfare`, `weight`, `hhid`) repeated across all
+household-level variables (e.g. `welfare`, `hhid`) repeated across all
 members of the same household.
 
 ## Conventions
@@ -23,7 +30,7 @@ members of the same household.
   [`haven`](https://haven.tidyverse.org).
 - **Missing** — mandatory variables may not be missing except where noted. Use
   Stata's system missing (`.`) for genuinely unknown values; do not use numeric
-  sentinels such as `-9` or `99`.
+  sentinels such as `-9` or `99`, or extended missing values (`.a`–`.z`).
 - **Labels** — categorical variables must carry Stata value labels; the numeric
   codes below are authoritative and must match across all surveys.
 - **Identifiers** are strings to preserve leading zeros and avoid precision loss.
@@ -83,8 +90,13 @@ Categorical variables must use these codes and labels exactly.
 
 : `1` Employed · `2` Unemployed · `3` Out of labor force · `4` Not applicable
 
-::: {.bg-light-yellow .pa3 .br2 .f6}
-**Status:** This variable dictionary is a working draft. Confirm the final variable
-list, value-label codes, and the precise definition of `welfare_self` with the
-50by30 methodology team before treating it as authoritative.
-:::
+## Validation
+
+These variables and value-label codes are enforced in the harmonization scripts. Any
+deviation from the schema will trigger an error and prevent the harmonized file from
+being uploaded to Datalibweb. The harmonization scripts also check for missing
+values in mandatory variables, and for negative or zero values in `welfare` and
+`weight`. The scripts will also check that `welfare_self` is not greater than
+`welfare`, and that `hsize` is consistent with the number of unique `pid`s per `hhid`.
+
+

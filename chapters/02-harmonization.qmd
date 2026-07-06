@@ -1,17 +1,13 @@
 ---
-title: "Harmonization"
+title: "Harmonize Data"
 author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
 ## Overview
 
-Once raw microdata is available on Datalibweb, it is harmonized into the common
-**50by30 schema** (see [Schema & Variable Dictionary](04-schema.qmd)). Harmonization
-maps survey-specific variables, codes, and units onto the mandatory and optional
-variables defined by the schema, so that welfare and self-reliance indicators are
-comparable across surveys, countries, and years.
+Once raw microdata is available on Datalibweb, it is harmonized to the **50by30 schema** (see [Schema & Variable Dictionary](04-schema.qmd)). Harmonization maps survey-specific variables, codes, and units onto the mandatory and optional variables defined by the schema, so that welfare and self-reliance indicators are comparable across surveys, countries, and years.
 
-## Section Heading
+## Sample harmonization scripts
 
-Narrative text here.
+Sample harmonization scripts are available in the [`50by30-data` repository](https://github.com/worldbank/50by30-data) for reference. They are not intended to be used as-is, but rather to illustrate the harmonization process and provide a starting point for writing survey-specific scripts.

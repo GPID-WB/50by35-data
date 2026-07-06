@@ -1,40 +1,31 @@
 ---
-title: "Upload, Review & Approval"
+title: "Upload Harmonized Data"
 author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
 ## Overview
+Harmonized microdata and harmonization scripts are uploaded to **Datalibweb** via **PRIMUS**. After review, approved files are published to Datalibweb for 50by30 monitoring.
 
-Harmonized data files are uploaded back through PRIMUS for review. A reviewer
-checks the file against the [schema](04-schema.qmd) — mandatory variables present,
-correct types/labels, valid value ranges — before approving it.
+## Uploading via PRIMUS
 
-::: {.bg-light-blue .pa3 .br2 .f6}
-**Include the harmonization scripts:** upload the code used to harmonize the raw
+Harmonized files are uploaded as a PRIMUS **transaction** using the `FDP-harmonized-data` process (`processid = 40`) by users with uploader status. 
+
+All harmonized files must pass validation checks before they can be uploaded to Datalibweb. These confirm that the harmonized file conforms to the schema, and that mandatory variables are present and non-missing. Any deviation from the schema will trigger an error and prevent the harmonized file from being uploaded to Datalibweb. They check for missing values in mandatory variables, for negative or zero values in `welfare` and `weight`, that `welfare_self` is not greater than `welfare`, and that `hsize` is consistent with the number of unique `pid`s per `hhid`.
+
+A harmonized data upload starts with a `.qml` file that returns a transaction ID. The `.qml` file contains metadata about the harmonized file, and calculates values for the 50by30 self-reliance indicator for the reviewer to approve. 
+
+For convenience, validation checks, .qml creation and upload functions are combined in one script so that they can be run together. The script is available in the [`50by30-data` repository](https://github.com/worldbank/50by30-data) and below.
+
+After uploading, the uploader confirms the draft transaction. Only then does it become visible to approvers.
+
+::: {.callout-tip}
+## Include the harmonization scripts
+Upload the code used to harmonize the raw
 data (e.g. the `.do` or `.R` files) together with the harmonized dataset, to the
 **`Programs/`** folder on Datalibweb. Add them as additional files on the same
 transaction ID so the harmonization is fully reproducible from source.
 :::
-
-## The approval workflow
-
-PRIMUS separates two roles with distinct actions:
-
-1. **Uploader → `CONFIRM`** — after uploading, the uploader confirms the draft
-   transaction. Only then does it become visible to approvers.
-2. **Approver → `APPROVE` or `REJECT`** — an authorized approver acts on the
-   confirmed transaction. Comments are **required** for a rejection.
-
-A rejected transaction goes back for correction and re-upload; an approved one is
-published to Datalibweb.
-
-::: {.bg-washed-red .pa3 .br2 .ba .b--light-red .f6}
-**Note:** A transaction cannot be approved or rejected more than once, and the
-action cannot be changed once it goes through.
-:::
-
-## Acting on a transaction
 
 ::: {.panel-tabset}
 
@@ -43,58 +34,74 @@ action cannot be changed once it goes through.
 ```r
 library(primus)
 
-# Uploader confirms the draft transaction
-primus_confirm("006-000327173-MNARAW-AGO-536ce")
-
-# Approver approves ...
-primus_approve("006-000327173-MNARAW-ALB-8ef53")
-
-# ... or rejects (comments required)
-primus_reject(
-  "007-000327173-MNAPOV-DJI-24674",
-  comments = "welfare variable missing labels"
-)
 ```
 
 ## Stata
 
 ```stata
-* Uploader confirms the draft transaction
-primus action, tranxid(006-000327173-MNARAW-AGO-536ce) proc(6) ///
-    decision(confirm) comments(harmonized file ready)
 
-* Approver approves ...
-primus action, tranxid(006-000327173-MNARAW-ALB-8ef53) proc(6) ///
-    decision(approve) comments(ok to approve)
 
-* ... or rejects (comments required)
-primus action, tranxid(007-000327173-MNAPOV-DJI-24674) proc(7) ///
-    decision(reject) comments(welfare variable missing labels)
 ```
 
 :::
 
-## Tracking status
+## Reviewing & approving via PRIMUS
 
-Query outstanding transactions to see what is pending review.
+Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. 
+
+Approved harmonized files are published to Datalibweb and used to monitor the 50by30 self-reliance indicator. Rejected files are returned to the uploader for correction and resubmission.
+
+::: {.callout-warning}
+## Note
+A transaction cannot be approved or rejected more than once, and the action cannot be changed once it goes through.
+:::
 
 ::: {.panel-tabset}
 
 ## R
 
 ```r
-primus_query_transactions(process_name = "GMD", status = "pending")
+library(primus)
+
+# Check pending transactions for review
+primus_list_transactions(process_name = "RAWPROC", status = "pending")
+
+# download the files for review
+primus_download(
+  process_name   = "RAWPROC",
+  survey_id      = "AGO_2029_HBS_V01_M",
+  transaction_id = "006-000327173-MNARAW-AGO-12944",
+  dest_dir       = "c:/Temp/AGO_2029_HBS_V01_M"
+)
+
+# Approve a transaction
+primus_action(
+  process_name   = "RAWPROC",
+  survey_id      = "AGO_2029_HBS_V01_M",
+  transaction_id = "006-000327173-MNARAW-AGO-12944",
+  decision       = "approve",
+  comments       = "raw data approved for harmonization"
+)
+
 ```
 
 ## Stata
 
 ```stata
-primus query, process(6) overallstatus(PENDING)
+
+* Check pending transactions for review
+primus list, proc(6) status(pending)
+
+* download the files for review
+primus download, proc(6) surveyid(AGO_2029_HBS_V01_M) tranxid(006-000327173-MNARAW-AGO-12944) ///
+    destdir(c:\Temp\AGO_2029_HBS_V01_M)
+
+* Approve a transaction
+primus action, tranxid(006-000327173-MNARAW-AGO-12944) proc(6) ///
+    decision(approve) comments("raw data approved for harmonization")
+
 ```
 
 :::
 
-## Outcome
 
-Only **approved** harmonized files are published and made available for
-distribution from Datalibweb.

@@ -1,30 +1,26 @@
 ---
-title: "Raw Data Upload"
+title: "Upload Raw Data"
 author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
 ## Overview
 
-Before a survey can be harmonized, its raw microdata should exist on **Datalibweb**.
-If a raw dataset is not already available there, it must first be uploaded through
-**PRIMUS** (Primary Review of Indicators and Microdata Upload System), the World Bank
-platform for uploading, reviewing, and approving microdata prior to publication.
+Before a survey can be harmonized, its raw microdata should exist on **Datalibweb**. If a raw dataset is not already available there (e.g. on the GMD server), it must first be uploaded through
+**PRIMUS**.
 
-::: {.bg-light-blue .pa3 .br2 .f6}
-**Check first:** query Datalibweb / PRIMUS to confirm whether the raw survey is
-already present before starting a new upload transaction.
+::: {.callout-tip}
+## Check first
+Query Datalibweb to confirm whether the raw survey is already present before starting a new upload transaction.
 :::
 
 ## Uploading via PRIMUS
 
-Raw files are uploaded as a PRIMUS **transaction** against the process assigned to
-the relevant survey program (a numeric `processid`, e.g. `6`). A raw upload starts
-with a `new` file that returns a transaction ID; additional files are then attached
-to that same transaction ID. Specify the destination `folderpath` and `type(raw)`.
+Raw files are uploaded as a PRIMUS **transaction** using the `FDPRaw-data` process (`processid = 39`) by users with uploader status. A raw data upload starts with a `new` file that returns a transaction ID; additional files are then attached to that same transaction ID. Specify the destination `folderpath` and `type(raw)`.
 
-::: {.bg-light-blue .pa3 .br2 .f6}
-**Include supporting documents:** upload the survey **documentation and
+::: {.callout-tip}
+## Include supporting documents
+Upload the survey **documentation and
 questionnaires** together with the raw data (to the process's documents folder,
 e.g. `Doc/`), so the source instruments travel with the microdata on Datalibweb.
 Add them as additional files on the same transaction ID.
@@ -67,13 +63,29 @@ primus_upload(
   transaction_id = up$transaction_id
 )
 
+# Alternatively, upload a zip that mirrors the process folder structure
+primus_upload(
+  process_name = "RAWPROC",
+  survey_id    = "AGO_2029_HBS_V01_M",
+  type         = "raw",
+  infile       = "AGO_2029_HBS_v01_M.zip",
+  zip          = TRUE,
+  new          = TRUE
+)
+
 # Confirm the draft transaction once all files are attached
-primus_confirm(up$transaction_id)
+primus_confirm(up$transaction_id, comments = "raw data ready for review")
 ```
 
 ## Stata
 
 ```stata
+* Check the processes you can act on
+primus list, proc
+
+* What folders / extensions does the process accept?
+primus folders, proc(6)
+
 * Upload a raw data file as a NEW transaction; the transaction ID is returned
 primus upload, processid(6) surveyid(AGO_2029_HBS_V01_M) ///
     type(raw) folderpath(Data/Stata) infile(c:\Temp\subin.dta) new
@@ -124,7 +136,56 @@ primus register, token(<your Datalibweb token>)
 
 :::
 
-## Outcome
+## Reviewing & approving via PRIMUS
 
-Once confirmed, the raw transaction is queued for the relevant reviewers. Approved
-raw files become the input to the [harmonization step](02-harmonization.qmd).
+Once the uploader confirms the transaction, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. If approved, the files are published to Datalibweb and become available for harmonization. If rejected, the uploader is notified and can correct the files and resubmit.
+
+The raw files become the input to the [harmonization step](02-harmonization.qmd).
+
+::: {.panel-tabset}
+
+## R
+
+```r
+library(primus)
+
+# Check pending transactions for review
+primus_list_transactions(process_name = "RAWPROC", status = "pending")
+
+# download the files for review
+primus_download(
+  process_name   = "RAWPROC",
+  survey_id      = "AGO_2029_HBS_V01_M",
+  transaction_id = "006-000327173-MNARAW-AGO-12944",
+  dest_dir       = "c:/Temp/AGO_2029_HBS_V01_M"
+)
+
+# Approve a transaction
+primus_action(
+  process_name   = "RAWPROC",
+  survey_id      = "AGO_2029_HBS_V01_M",
+  transaction_id = "006-000327173-MNARAW-AGO-12944",
+  decision       = "approve",
+  comments       = "raw data approved for harmonization"
+)
+
+```
+
+## Stata
+
+```stata
+
+* Check pending transactions for review
+primus list, proc(6) status(pending)
+
+* download the files for review
+primus download, proc(6) surveyid(AGO_2029_HBS_V01_M) tranxid(006-000327173-MNARAW-AGO-12944) ///
+    destdir(c:\Temp\AGO_2029_HBS_V01_M)
+
+* Approve a transaction
+primus action, tranxid(006-000327173-MNARAW-AGO-12944) proc(6) ///
+    decision(approve) comments("raw data approved for harmonization")
+
+```
+
+:::
