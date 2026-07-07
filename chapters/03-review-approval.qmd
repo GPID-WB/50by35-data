@@ -5,26 +5,37 @@ date: today
 ---
 
 ## Overview
-Harmonized microdata and harmonization scripts are uploaded to **Datalibweb** via **PRIMUS**. After review, approved files are published to Datalibweb for 50by30 monitoring.
+Harmonized microdata and harmonization scripts are uploaded to **Datalibweb** via **PRIMUS**. After review, approved files are published to Datalibweb for 50by35 monitoring.
 
 ## Uploading via PRIMUS
 
 Harmonized files are uploaded as a PRIMUS **transaction** using the `FDP-harmonized-data` process (`processid = 40`) by users with uploader status. 
 
-All harmonized files must pass validation checks before they can be uploaded to Datalibweb. These confirm that the harmonized file conforms to the schema, and that mandatory variables are present and non-missing. Any deviation from the schema will trigger an error and prevent the harmonized file from being uploaded to Datalibweb. They check for missing values in mandatory variables, for negative or zero values in `welfare` and `weight`, that `welfare_self` is not greater than `welfare`, and that `hsize` is consistent with the number of unique `pid`s per `hhid`.
+All harmonized files must pass validation checks before they can be uploaded to Datalibweb. These confirm that the harmonized file conforms to the schema, and that mandatory variables are present and non-missing. Any deviation from the schema will trigger an error and prevent the harmonized file from being uploaded to Datalibweb. They check for missing values in mandatory variables, for negative or zero values in `welfare` and `weight`, and that `welfare_self` is not greater than `welfare`. Households where `hhsize` differs from the number of `pid` records are flagged with a warning (rosters can be incomplete, and refugee-only samples keep a subset of household members). The validation scripts are `Stata/validate_50by35.do` and `R/validate_50by35.R` in this repository.
 
-A harmonized data upload starts with a `.qml` file that returns a transaction ID. The `.qml` file contains metadata about the harmonized file, and calculates values for the 50by30 self-reliance indicator for the reviewer to approve. 
+A harmonized data upload starts with an **indicator `.xml`** file that opens the transaction and returns a transaction ID. The XML contains metadata about the harmonized file, the poverty headcount from `welfare`, and the **50by35 self-reliance share** computed from `welfare_self` at the $3.00/day 2021 PPP line — the values the reviewer approves. PRIMUS leaves the XML's content to each team, provided it follows the `<PRIMUS_ANALYSIS>` heading format; both upload scripts in this repository write the same compact document.
 
-For convenience, validation checks, .qml creation and upload functions are combined in one script so that they can be run together. The script is available in the [`50by30-data` repository](https://github.com/worldbank/50by30-data) and below.
+### CPI and PPP conversion factors {#sec-cpi-ppp}
+
+The conversion factors come from the [World Bank PIP](https://pip.worldbank.org) auxiliary tables, pinned to the **2021 PPP framework** (R: `pipr::get_aux("cpi", ppp_version = 2021)`; Stata: `pip tables, table(cpi) ppp_year(2021) clear`):
+
+- **PPP** — the ICP 2021 purchasing-power-parity conversion factor (LCU per 2021 international $), one value per country.
+- **CPI** — PIP's consumer price index, normalized so that CPI $= 1$ in 2021 and aligned to each survey's fieldwork period, one value per country-year.
+
+They enter the self-reliance indicator exactly as in the [formula on the home page](../index.qmd): `welfare_self` (annual per capita LCU at survey-year prices) is divided by 365 to get a daily value, by the survey-year CPI to convert to 2021 prices, and by the PPP factor to convert to 2021 PPP dollars, then compared with $z = \$3.00$.
+
+::: {.callout-warning}
+## Surveys not in PIP
+PIP's CPI table only has values for country-years with a PIP survey. For surveys outside PIP (e.g. the Uganda 2018 refugee survey), the lookup fails; set the `cpi_override` parameter in the upload scripts to the ratio $CPI_{t}/CPI_{2021}$ computed from the national CPI series (e.g. WDI series `FP.CPI.TOTL`).
+:::
+
+For convenience, the validation checks, XML creation and upload steps are combined in one script per client — `Stata/03_upload_harmonized.do` and `R/03_upload_harmonized.R` in this repository — condensed below.
 
 After uploading, the uploader confirms the draft transaction. Only then does it become visible to approvers.
 
 ::: {.callout-tip}
 ## Include the harmonization scripts
-Upload the code used to harmonize the raw
-data (e.g. the `.do` or `.R` files) together with the harmonized dataset, to the
-**`Programs/`** folder on Datalibweb. Add them as additional files on the same
-transaction ID so the harmonization is fully reproducible from source.
+Upload the code used to harmonize the raw data (e.g. the `.do` or `.R` files) together with the harmonized dataset, to the **`Programs/`** folder on Datalibweb. Add them as additional files on the same transaction ID so the harmonization is fully reproducible from source.
 :::
 
 ::: {.panel-tabset}
@@ -33,14 +44,76 @@ transaction ID so the harmonization is fully reproducible from source.
 
 ```r
 library(primus)
+library(pipr)
+library(haven)
 
+source("R/validate_50by35.R")
+survey_id <- "COL_2023_GEIH_V01_M_V01_A_FDP"
+
+# 1. Validate: any schema violation stops before upload
+df <- read_dta(paste0("data/processed/", survey_id, "_WELF.dta"))
+validate_50by35(df)
+
+# 2. CPI / PPP conversion factors from PIP, pinned to the 2021 framework
+cpi <- get_aux("cpi", ppp_version = 2021)
+ppp <- get_aux("ppp", ppp_version = 2021)
+df$cpi2021 <- cpi$value[cpi$country_code == df$countrycode[1] &
+                        as.integer(as.character(cpi$year)) == df$year[1] &
+                        cpi$data_level == "national"]
+df$icp2021 <- ppp$value[ppp$country_code == df$countrycode[1] &
+                        ppp$data_level == "national"][1]
+
+# 3. Compute the self-reliance share and write the indicator XML —
+#    see R/03_upload_harmonized.R for the XML writer (PRIMUS accepts a
+#    team-defined XML that follows the <PRIMUS_ANALYSIS> heading format)
+sr <- weighted.mean(df$welfare_self/365/df$cpi2021/df$icp2021 >= 3.00, df$weight)
+
+# 4. The XML opens the transaction; then attach the data and programs
+up <- primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
+                    infile = "indicator.xml", xml = "indicator.xml",
+                    folder_name = "Data/Stata")
+primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
+              infile = paste0("data/processed/", survey_id, "_WELF.dta"),
+              folder_name = "Data/Stata", transaction_id = up$transaction_id)
+primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
+              infile = "Stata/harmonize_COL_2023_GEIH.do",
+              folder_name = "Programs", transaction_id = up$transaction_id)
+
+# 5. Confirm the draft transaction once all files are attached
+primus_confirm(up$transaction_id, comments = "harmonized data ready for review")
 ```
 
 ## Stata
 
 ```stata
+local surveyid "COL_2023_GEIH_V01_M_V01_A_FDP"
 
+* 1. Validate: any schema violation stops before upload
+use "data/processed/`surveyid'_WELF.dta", clear
+do "Stata/validate_50by35.do"
 
+* 2. CPI / 2021 PPP conversion factors from PIP (see the full script for
+*    the lookup; pip tables, table(cpi) / table(ppp))
+
+* 3. Build the indicator XML — see Stata/03_upload_harmonized.do, which
+*    computes the self-reliance share at $3.00/day 2021 PPP and writes
+*    the <PRIMUS_ANALYSIS> document
+
+* 4. The XML opens the transaction (xmlbl flag); the transaction ID is
+*    returned in r(prmTransId). Then attach the data and programs.
+primus upload, processid(40) surveyid(`surveyid') ///
+    type(harmonized) infile("`surveyid'.xml") xmlbl new
+local tranxid = r(prmTransId)
+
+primus upload, proc(40) surveyid(`surveyid') type(harmonized) ///
+    folderpath(Data/Stata) infile("data/processed/`surveyid'_WELF.dta") tranxid(`tranxid')
+
+primus upload, proc(40) surveyid(`surveyid') type(harmonized) ///
+    folderpath(Programs) infile("Stata/harmonize_COL_2023_GEIH.do") tranxid(`tranxid')
+
+* 5. Confirm the draft transaction (uploader step)
+primus action, tranxid(`tranxid') proc(40) ///
+    decision(confirm) comments(harmonized data ready for review)
 ```
 
 :::
@@ -49,7 +122,7 @@ library(primus)
 
 Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. 
 
-Approved harmonized files are published to Datalibweb and used to monitor the 50by30 self-reliance indicator. Rejected files are returned to the uploader for correction and resubmission.
+Approved harmonized files are published to Datalibweb and used to monitor the 50by35 self-reliance indicator. Rejected files are returned to the uploader for correction and resubmission.
 
 ::: {.callout-warning}
 ## Note
@@ -64,24 +137,17 @@ A transaction cannot be approved or rejected more than once, and the action cann
 library(primus)
 
 # Check pending transactions for review
-primus_list_transactions(process_name = "RAWPROC", status = "pending")
+primus_query_transactions("FDP-harmonized-data", status = "pending")
 
-# download the files for review
-primus_download(
-  process_name   = "RAWPROC",
-  survey_id      = "AGO_2029_HBS_V01_M",
-  transaction_id = "006-000327173-MNARAW-AGO-12944",
-  dest_dir       = "c:/Temp/AGO_2029_HBS_V01_M"
-)
+# download the files and the indicator XML for review
+primus_download_data("040-000327173-LACHARM-COL-12945",
+                     dest_dir = "c:/Temp/COL_2023_GEIH_V01_M")
+primus_get_xml("040-000327173-LACHARM-COL-12945", out = "indicator.xml")
 
-# Approve a transaction
-primus_action(
-  process_name   = "RAWPROC",
-  survey_id      = "AGO_2029_HBS_V01_M",
-  transaction_id = "006-000327173-MNARAW-AGO-12944",
-  decision       = "approve",
-  comments       = "raw data approved for harmonization"
-)
+# Approve (or reject) the transaction
+primus_approve("040-000327173-LACHARM-COL-12945",
+               comments = "harmonized data approved for publication")
+# primus_reject("040-...", comments = "<what must be fixed>")  # comments required
 
 ```
 
@@ -90,15 +156,19 @@ primus_action(
 ```stata
 
 * Check pending transactions for review
-primus list, proc(6) status(pending)
+primus query, process(40) overallstatus(PENDING)
 
-* download the files for review
-primus download, proc(6) surveyid(AGO_2029_HBS_V01_M) tranxid(006-000327173-MNARAW-AGO-12944) ///
-    destdir(c:\Temp\AGO_2029_HBS_V01_M)
+* list the attached files and review the indicator values
+primus download, processid(40) tranxid(040-000327173-LACHARM-COL-12945) filelist
+primus download, processid(40) tranxid(040-000327173-LACHARM-COL-12945) indicator
+
+* download the indicator XML itself
+primus download, xml processid(40) tranxid(040-000327173-LACHARM-COL-12945) ///
+    outfile(indicator.xml)
 
 * Approve a transaction
-primus action, tranxid(006-000327173-MNARAW-AGO-12944) proc(6) ///
-    decision(approve) comments("raw data approved for harmonization")
+primus action, tranxid(040-000327173-LACHARM-COL-12945) processid(40) ///
+    decision(approve) comments(harmonized data approved for publication)
 
 ```
 

@@ -20,16 +20,10 @@ Raw files are uploaded as a PRIMUS **transaction** using the `FDPRaw-data` proce
 
 ::: {.callout-tip}
 ## Include supporting documents
-Upload the survey **documentation and
-questionnaires** together with the raw data (to the process's documents folder,
-e.g. `Doc/`), so the source instruments travel with the microdata on Datalibweb.
-Add them as additional files on the same transaction ID.
+Upload the survey **documentation and questionnaires** together with the raw data (to the process's documents folder, e.g. `Doc/`), so the source instruments travel with the microdata on Datalibweb. Add them as additional files on the same transaction ID.
 :::
 
-Two clients are available: the [`primus` R
-package](https://github.com/worldbank/primus-r) (cross-platform) and the
-[`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows). Both
-call the same PRIMUS API; use whichever matches your harmonization workflow.
+A web interface and two clients are available to interact with PRIMUS: the [`primus` R package](https://github.com/worldbank/primus-r) (cross-platform) and the [`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows). Both call the same PRIMUS API; use whichever matches your harmonization workflow.
 
 ::: {.panel-tabset}
 
@@ -42,35 +36,35 @@ library(primus)
 primus_list_processes()
 
 # What folders / extensions does the process accept?
-primus_folders(process_name = "RAWPROC")
+primus_folders(process_name = "FDPRaw-data")
 
 # Upload a raw data file (creates a new transaction)
 up <- primus_upload(
-  process_name = "RAWPROC",
-  survey_id    = "AGO_2029_HBS_V01_M",
+  process_name = "FDPRaw-data",
+  survey_id    = "COL_2023_GEIH_V01_M",
   type         = "raw",
-  infile       = "subin.dta",
+  infile       = "household_data_2023.dta",
   folder_name  = "Data/Stata"
 )
 
 # Add additional files to the same transaction
 primus_upload(
-  process_name   = "RAWPROC",
-  survey_id      = "AGO_2029_HBS_V01_M",
+  process_name   = "FDPRaw-data",
+  survey_id      = "COL_2023_GEIH_V01_M",
   type           = "raw",
-  infile         = "deflators.dta",
+  infile         = "individual_data_2023.dta",
   folder_name    = "Data/Stata",
   transaction_id = up$transaction_id
 )
 
 # Alternatively, upload a zip that mirrors the process folder structure
+# (omitting transaction_id starts a new transaction)
 primus_upload(
-  process_name = "RAWPROC",
-  survey_id    = "AGO_2029_HBS_V01_M",
+  process_name = "FDPRaw-data",
+  survey_id    = "COL_2023_GEIH_V01_M",
   type         = "raw",
-  infile       = "AGO_2029_HBS_v01_M.zip",
-  zip          = TRUE,
-  new          = TRUE
+  infile       = "COL_2023_GEIH_V01_M.zip",
+  zip          = TRUE
 )
 
 # Confirm the draft transaction once all files are attached
@@ -80,27 +74,29 @@ primus_confirm(up$transaction_id, comments = "raw data ready for review")
 ## Stata
 
 ```stata
-* Check the processes you can act on
-primus list, proc
+* Check the processes you can act on (lists all processes and their metadata)
+primus download, meta
 
 * What folders / extensions does the process accept?
-primus folders, proc(6)
+primus download, processid(39) folders
 
-* Upload a raw data file as a NEW transaction; the transaction ID is returned
-primus upload, processid(6) surveyid(AGO_2029_HBS_V01_M) ///
-    type(raw) folderpath(Data/Stata) infile(c:\Temp\subin.dta) new
+* Upload a raw data file as a NEW transaction; the transaction ID is
+* returned in r(prmTransId)
+primus upload, processid(39) surveyid(COL_2023_GEIH_V01_M) ///
+    type(raw) folderpath(Data/Stata) infile(c:\Temp\household_data_2023.dta) new
+local tranxid = r(prmTransId)
 
-* Add other files to the SAME transaction ID reported above
-primus upload, proc(6) surveyid(AGO_2029_HBS_V01_M) ///
-    type(raw) folderpath(Data/Stata) infile(c:\Temp\spatial_deflators.dta) ///
-    tranxid(006-000327173-MNARAW-AGO-12944)
+* Add other files to the SAME transaction ID
+primus upload, proc(39) surveyid(COL_2023_GEIH_V01_M) ///
+    type(raw) folderpath(Data/Stata) infile(c:\Temp\individual_data_2023.dta) ///
+    tranxid(`tranxid')
 
 * Alternatively, upload a zip that mirrors the process folder structure
-primus upload, processid(6) surveyid(AGO_2029_HBS_V01_M) ///
-    type(raw) infile(c:\Temp\AGO_2029_HBS_v01_M.zip) zip new
+primus upload, processid(39) surveyid(COL_2023_GEIH_V01_M) ///
+    type(raw) infile(c:\Temp\COL_2023_GEIH_V01_M.zip) zip new
 
 * Confirm the draft transaction (uploader step)
-primus action, tranxid(006-000327173-MNARAW-AGO-12944) proc(6) ///
+primus action, tranxid(`tranxid') proc(39) ///
     decision(confirm) comments(raw data ready for review)
 ```
 
@@ -108,7 +104,7 @@ primus action, tranxid(006-000327173-MNARAW-AGO-12944) proc(6) ///
 
 ## Authentication
 
-Both clients use the same **Datalibweb token** (valid 30 days, renewed on the
+Both clients use the same **datalibweb token** (valid 30 days, renewed on the
 Datalibweb website).
 
 ::: {.panel-tabset}
@@ -150,24 +146,17 @@ The raw files become the input to the [harmonization step](02-harmonization.qmd)
 library(primus)
 
 # Check pending transactions for review
-primus_list_transactions(process_name = "RAWPROC", status = "pending")
+primus_query_transactions("FDPRaw-data", status = "pending")
 
-# download the files for review
-primus_download(
-  process_name   = "RAWPROC",
-  survey_id      = "AGO_2029_HBS_V01_M",
-  transaction_id = "006-000327173-MNARAW-AGO-12944",
-  dest_dir       = "c:/Temp/AGO_2029_HBS_V01_M"
-)
+# inspect and download the files for review
+primus_transaction_details("039-000327173-LACRAW-COL-12944")
+primus_download_data("039-000327173-LACRAW-COL-12944",
+                     dest_dir = "c:/Temp/COL_2023_GEIH_V01_M")
 
-# Approve a transaction
-primus_action(
-  process_name   = "RAWPROC",
-  survey_id      = "AGO_2029_HBS_V01_M",
-  transaction_id = "006-000327173-MNARAW-AGO-12944",
-  decision       = "approve",
-  comments       = "raw data approved for harmonization"
-)
+# Approve (or reject) the transaction
+primus_approve("039-000327173-LACRAW-COL-12944",
+               comments = "raw data approved for harmonization")
+# primus_reject("039-...", comments = "<what must be fixed>")  # comments required
 
 ```
 
@@ -176,15 +165,16 @@ primus_action(
 ```stata
 
 * Check pending transactions for review
-primus list, proc(6) status(pending)
+primus query, process(39) overallstatus(PENDING)
 
-* download the files for review
-primus download, proc(6) surveyid(AGO_2029_HBS_V01_M) tranxid(006-000327173-MNARAW-AGO-12944) ///
-    destdir(c:\Temp\AGO_2029_HBS_V01_M)
+* list the files attached to a transaction
+* (the Stata client lists files but does not download the data itself —
+* use the PRIMUS web interface or the R client to inspect file contents)
+primus download, processid(39) tranxid(039-000327173-LACRAW-COL-12944) filelist
 
 * Approve a transaction
-primus action, tranxid(006-000327173-MNARAW-AGO-12944) proc(6) ///
-    decision(approve) comments("raw data approved for harmonization")
+primus action, tranxid(039-000327173-LACRAW-COL-12944) processid(39) ///
+    decision(approve) comments(raw data approved for harmonization)
 
 ```
 

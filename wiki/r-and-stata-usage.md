@@ -41,12 +41,19 @@ df |>
 
 ## Stata Code Chunks
 
-Quarto supports Stata natively via the built-in `stata` engine (Quarto ≥ 1.4).
-Stata must be installed on your machine and Quarto must be able to find it (see below).
+Quarto runs Stata chunks through knitr and the **`Statamarkdown`** R package
+(install once with `install.packages("Statamarkdown")`). Stata must be installed
+on your machine and `Statamarkdown` must be able to find it (see below). Load the
+package in a setup chunk before the first `{stata}` chunk in each `.qmd`.
 
 ### Basic example
 
 ````markdown
+```{r}
+#| include: false
+library(Statamarkdown)
+```
+
 ```{stata}
 #| label: tbl-summary
 #| echo: true
@@ -93,6 +100,12 @@ This is a one-time system setting that makes Stata accessible from any terminal.
    ```
    If Stata runs without an error, you're good.
 
+   > **macOS:** the executable is named after your edition (`stata-mp`, `stata-se`,
+   > or `stata-be`). Verify with:
+   > ```bash
+   > stata-mp -q -b -e "display 1"
+   > ```
+
 ### Option B — Set the path inside R (per-project)
 
 If you prefer not to modify system settings, set the path in R instead. Add this line
@@ -121,25 +134,30 @@ Adjust the filename to match your Stata edition:
 | Stata/IC | `Stata-64.exe` |
 | Stata/BE | `StataBE-64.exe` |
 
-> **macOS:** Add Stata to PATH in `~/.zshrc`:
+> **macOS:** Add Stata to PATH in `~/.zshrc` (adjust `StataMP` to your edition),
+> then restart open terminals:
 > ```bash
 > export PATH="/Applications/Stata/StataMP.app/Contents/MacOS:$PATH"
 > ```
-> Or set the path via `Statamarkdown::stata_engine_path("/Applications/Stata/StataMP.app/Contents/MacOS/stata-mp")`.
+> On macOS `Statamarkdown` usually **auto-detects** Stata under `/Applications`
+> (loading the package prints `Stata found at …`), so no path setting is needed.
+> If detection fails, set it explicitly via
+> `Statamarkdown::stata_engine_path("/Applications/Stata/StataMP.app/Contents/MacOS/stata-mp")`.
 
 ---
 
-## Using `Statamarkdown` (Alternative / Fallback)
+## Installing `Statamarkdown`
 
-The `Statamarkdown` R package is an alternative to the native Quarto Stata engine.
-Install it once in R:
+The `Statamarkdown` R package is what executes ` ```{stata} ` chunks when Quarto
+renders. Install it once in R:
 
 ```r
 install.packages("Statamarkdown")
 ```
 
-Code chunks still use ` ```{stata} ` — no syntax change needed. The package uses
-the path set via `stata_engine_path()` (see Option B above).
+It finds Stata automatically in the default install locations (`C:/Program Files`
+on Windows, `/Applications` on macOS); use `stata_engine_path()` (see Option B
+above) only if auto-detection fails.
 
 ---
 

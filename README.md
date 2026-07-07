@@ -1,14 +1,11 @@
-# 50by30 Microdata Pipeline
+# 50by35 Microdata Pipeline
 
-This repository contains the Quarto book documenting the data pipeline used to
-**harmonize, upload, review, and access** microdata used to monitor the
-UNHCR **50by30 vision**: that 50% of refugees in protracted crises are
-self-reliant by 2035.
+This repository contains the Quarto book documenting the data pipeline used to **upload, harmonize, and review** microdata used to monitor the UNHCR **50by35 vision**: that 50 percent of refugees in protracted crises are self-reliant by 2035.
 
 ## Live Book
 
 The rendered book is available at:
-**https://GPID-WB.github.io/50by30-data/**
+**https://GPID-WB.github.io/50by35-data/**
 
 ## Repository Structure
 
@@ -16,7 +13,7 @@ The rendered book is available at:
 |---|---|
 | `chapters/` | Book chapters as `.qmd` files |
 | `R/` | Shared R utility functions |
-| `stata/` | Shared Stata do-files |
+| `Stata/` | Shared Stata do-files |
 | `data/raw/` | Raw data (not committed — see data access instructions) |
 | `data/processed/` | Processed/derived data (not committed) |
 | `_extensions/tachyons/` | Tachyons CSS Quarto extension |
@@ -40,8 +37,8 @@ preview chapters.
 
 ```bash
 # Clone the repo
-git clone https://github.com/GPID-WB/50by30-data.git
-cd 50by30-data
+git clone https://github.com/GPID-WB/50by35-data.git
+cd 50by35-data
 
 # Install R packages
 Rscript -e "renv::restore()"

@@ -8,7 +8,7 @@ date: today
 ## Status
 This variable dictionary is a working draft. Confirm the final variable
 list, value-label codes, and the precise definition of `welfare_self` with the
-50by30 methodology team before treating it as authoritative.
+50by35 methodology team before treating it as authoritative.
 :::
 
 ## Overview
@@ -39,26 +39,26 @@ members of the same household.
 
 | Variable | Label | Type | Unit / range | Missing | Notes |
 |---|---|---|---|---|---|
-| `hhid` | Household identifier | `str` | — | Not allowed | Unique per household within the survey; string to preserve leading zeros |
-| `pid` | Person identifier | `str` | — | Not allowed | Unique per individual within the survey |
-| `welfare` | Welfare aggregate | `double` | ≥ 0, LCU, annual per capita | Not allowed | Consumption or income aggregate from the survey's official poverty methodology; `welfare_type` records which |
-| `welfare_type` | Welfare measure type | `byte` | `1`–`3` | Not allowed | `1` = Consumption, `2` = Income, `3` = Expenditure |
-| `welfare_self` | Self-reliance-adjusted welfare | `double` | ≥ 0, LCU, annual per capita | Not allowed | Welfare measure used for the 50by30 self-reliance indicator |
-| `weight` | Sampling weight | `double` | > 0 | Not allowed | Individual sampling/population weight |
-| `weight_type` | Weight type | `byte` | `1`–`2` | Not allowed | `1` = Frequency weight (FW), `2` = Probability weight (PW) |
-| `hsize` | Household size | `int` | ≥ 1 | Not allowed | Number of household members |
 | `countrycode` | Country code | `str3` | ISO / WDI 3-letter | Not allowed | e.g. `AGO`, `ETH` |
 | `year` | Survey year | `int` | 1990–2035 | Not allowed | Four-digit year of data collection |
+| `hhid` | Household identifier | `str` | — | Not allowed | Unique per household within the survey; string to preserve leading zeros |
+| `pid` | Person identifier | `str` | — | Not allowed | Unique per individual within the survey |
+| `welfare` | Welfare aggregate | `double` | > 0, LCU, annual per capita | Not allowed | Consumption or income aggregate from the survey's official poverty methodology  | 
+| `welfare_type` | Welfare measure type | `byte` | `1`–`3` | Not allowed | `1` = Consumption, `2` = Income, `3` = Expenditure |
+| `welfare_self` | Self-reliance-adjusted welfare | `double` | ≥ 0, LCU, annual per capita | Not allowed | Welfare measure used for the 50by35 self-reliance indicator |
+| `weight` | Sampling weight | `double` | > 0 | Not allowed | Individual sampling/population weight |
+| `camp` | Camp/non-camp | `byte` | `0`/`1` | Allowed | `0` = Non-camp, `1` = Camp |
+| `urban` | Urban/rural | `byte` | `0`/`1` | Allowed | `0` = Rural, `1` = Urban |
 
 ## Optional Variables
 
 | Variable | Label | Type | Unit / range | Notes |
 |---|---|---|---|---|
+| `hhsize` | Household size | `int` | ≥ 1 | Number of household members |
 | `age` | Age | `double` | 0–120 years | Decimal allowed for children under 5 (per GMD 2.0); integer otherwise |
-| `male` | Sex | `byte` | `0`–`1` | `0` = Female, `1` = Male |
-| `urban` | Urban/rural | `byte` | `0`–`1` | `0` = Rural, `1` = Urban |
-| `educat4` | Education (4 cat.) | `byte` | `1`–`4` | See value labels below |
-| `empstat` | Employment status | `byte` | `1`–`4` | `1` = Employed, `2` = Unemployed, `3` = Out of labor force, `4` = Not applicable |
+| `male` | Sex | `byte` | `0`/`1` | `0` = Female, `1` = Male |
+| `educat4` | Highest education (4 cat.) | `byte` | `1`–`4` | See value labels below |
+| `empstat` | Employment status | `byte` | `1`–`4` | See value labels below |
 | `strata` | Sampling strata | `int` | — | Design variable for variance estimation |
 | `psu` | Primary sampling unit | `long` | — | Design variable for variance estimation |
 
@@ -69,10 +69,6 @@ Categorical variables must use these codes and labels exactly.
 `welfare_type`
 
 : `1` Consumption · `2` Income · `3` Expenditure
-
-`weight_type`
-
-: `1` Frequency weight (FW) · `2` Probability weight (PW)
 
 `male`
 
@@ -92,11 +88,14 @@ Categorical variables must use these codes and labels exactly.
 
 ## Validation
 
-These variables and value-label codes are enforced in the harmonization scripts. Any
-deviation from the schema will trigger an error and prevent the harmonized file from
-being uploaded to Datalibweb. The harmonization scripts also check for missing
-values in mandatory variables, and for negative or zero values in `welfare` and
-`weight`. The scripts will also check that `welfare_self` is not greater than
-`welfare`, and that `hsize` is consistent with the number of unique `pid`s per `hhid`.
+These variables and value-label codes are enforced by the validation scripts
+(`Stata/validate_50by35.do`, `R/validate_50by35.R`), which run before every
+harmonized upload. Any deviation from the schema triggers an error and prevents
+the harmonized file from being uploaded to Datalibweb. The checks cover missing
+values in mandatory variables, negative or zero values in `welfare` and
+`weight`, and that `welfare_self` is not greater than `welfare`. Households
+where `hhsize` differs from the number of `pid` records are flagged with a
+warning rather than an error, since rosters can be incomplete and refugee-only
+samples keep a subset of household members.
 
 

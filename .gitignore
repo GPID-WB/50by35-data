@@ -73,9 +73,25 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
+# Personal scratch space (not part of the book or pipeline)
+sandbox/
+
+# Stata batch-mode logs
+*.log
+
 # OS
 .DS_Store
 Thumbs.db
 
 /.quarto/
 **/*.quarto_ipynb
+
+# Claude AI
+.claude/
+
+# Data files (Stata, SPSS, etc.) — never commit raw or processed microdata
+**/*.dta
+**/*.sav
+**/*.parquet
+**/*.Rd
+**/*.RData

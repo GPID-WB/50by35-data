@@ -1,4 +1,4 @@
-# Contributing to the 50by30 Microdata Pipeline Book
+# Contributing to the 50by35 Microdata Pipeline Book
 
 ## Who This Guide Is For
 
@@ -8,7 +8,7 @@ Instructions are written for **Windows** users. macOS notes are included where t
 steps differ.
 
 > **IDE:** This project uses [Positron](https://positron.posit.co/) as the recommended
-> IDE. If you prefer RStudio, see [`wiki/rstudio-users.md`](rstudio-users.md).
+> IDE.
 
 ---
 
@@ -73,11 +73,11 @@ so Quarto can find it.
 Open **Git Bash** (installed with Git) or the **Positron Terminal** and run:
 
 ```bash
-git clone https://github.com/GPID-WB/50by30-data.git
+git clone https://github.com/GPID-WB/50by35-data.git
 ```
 
-Then open the `50by30-data` folder in Positron: **File → Open Folder…** and select the
-`50by30-data` folder. Positron will detect it as an R project automatically.
+Then open the `50by35-data` folder in Positron: **File → Open Folder…** and select the
+`50by35-data` folder. Positron will detect it as an R project automatically.
 
 ---
 

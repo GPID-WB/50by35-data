@@ -3,12 +3,12 @@ project:
   output-dir: docs   # GitHub Pages serves from /docs on main branch
 
 book:
-  title: "50by30 Microdata Pipeline"
-  subtitle: "Harmonize and publish microdata used to monitor the UNHCR 50by30 Vision"
+  title: "50by35 Microdata Pipeline"
+  subtitle: "Harmonize and publish microdata used to monitor the UNHCR 50by35 Vision"
   date: today
   author:
     - name: "World Bank / UNHCR Joint Team"
-  repo-url: https://github.com/GPID-WB/50by30-data
+  repo-url: https://github.com/GPID-WB/50by35-data
   repo-actions: [edit, issue]
   chapters:
     - index.qmd
@@ -17,9 +17,12 @@ book:
         - chapters/01-raw-upload.qmd
         - chapters/02-harmonization.qmd
         - chapters/03-review-approval.qmd
+    - part: "Access"
+      chapters:
+        - chapters/04-access.qmd
     - part: "Reference"
       chapters:
-        - chapters/04-schema.qmd
+        - chapters/05-schema.qmd
 
 bibliography: references.bib
 

@@ -1,0 +1,151 @@
+---
+title: "Access Data"
+author: "World Bank / UNHCR Joint Team"
+date: today
+---
+
+## Overview
+
+Approved files are distributed through **Datalibweb**, in two collections (servers):
+
+| Collection | Content |
+|---|---|
+| `FDPRAW` | Raw survey microdata, questionnaires and documentation |
+| `FDP` | Harmonized microdata (50by35 schema) and harmonization programs |
+
+The harmonized welfare module in the `FDP` collection is called **`WELF`**.
+
+Two clients are available: the [`datalibweb` Stata package](https://github.com/worldbank/datalibweb) and the [`dlw` R package](https://github.com/worldbank/dlw). Both require the World Bank intranet/VPN, permission to access the collections, and the same Datalibweb token used by PRIMUS (valid 30 days, renewed on the Datalibweb website).
+
+## File naming conventions
+
+Datalibweb survey identifiers guarantee replicability: versions are **never replaced** — new releases get a new version number, and previous vintages remain available. Always record the full survey ID used in an analysis.
+
+**Raw (master) data** in `FDPRAW`:
+
+```
+CCC_YYYY_SSSS_V01_M
+```
+
+- `CCC` — 3-letter ISO/WDI country code (e.g. `COL`)
+- `YYYY` — year data collection started
+- `SSSS` — survey acronym (e.g. `GEIH`, `EHCVM`, `RHS`)
+- `V##_M` — version of the **master** (original) data; first release is `V01`
+
+**Harmonized data** in `FDP`:
+
+```
+CCC_YYYY_SSSS_V01_M_V01_A_FDP
+```
+
+- `V##_A` — version of the harmonization (**adaptation**), independent of the master version
+- `FDP` — the collection of harmonized surveys
+
+**Module files** append the module name to the survey ID. The 50by35 harmonized welfare file for Colombia is:
+
+```
+COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta
+```
+
+## Checking the catalog
+
+::: {.panel-tabset}
+
+## R
+
+```r
+library(dlw)
+
+# all collections (servers) you can access
+dlw_server_catalog()
+
+# what is in a collection
+dlw_server_catalog("FDPRAW")
+dlw_server_catalog("FDP")
+
+# everything available for one country, across collections
+dlw_country_catalog("COL")
+
+# files for one country within a collection
+dlw_server_inventory("COL", server = "FDP")
+```
+
+## Stata
+
+```stata
+* interactive browser: click through region -> country -> collection
+datalibweb
+
+* list what is available for a country-year in a collection; when raw
+* data is requested, datalibweb lists the individual files to pick from
+datalibweb, country(COL) years(2023) type(FDPRAW) clear
+```
+
+:::
+
+## Loading data
+
+::: {.panel-tabset}
+
+## R
+
+```r
+library(dlw)
+
+# harmonized 50by35 welfare module (WELF) from the FDP collection
+df <- dlw_get_data(
+  country_code = "COL",
+  filename     = "COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta",
+  server       = "FDP"
+)
+
+# a raw file from the FDPRAW collection
+raw <- dlw_get_data(
+  country_code = "COL",
+  filename     = "individual_data_2023.dta",
+  server       = "FDPRAW"
+)
+```
+
+## Stata
+
+```stata
+* harmonized 50by35 welfare module (WELF) from the FDP collection;
+* the latest master and harmonization versions are loaded by default
+datalibweb, country(COL) years(2023) type(FDP) mod(WELF) clear
+
+* pin specific vintages for replicability
+datalibweb, country(COL) years(2023) type(FDP) mod(WELF) ///
+    vermast(01) veralt(01) clear
+
+* a raw file from the FDPRAW collection
+datalibweb, country(COL) years(2023) type(FDPRAW) ///
+    surveyid(COL_2023_GEIH_V01_M) filename(individual_data_2023.dta) clear
+
+* several countries at once, appended
+datalibweb, country(COL TCD UGA) years(2018 2022 2023) type(FDP) mod(WELF) clear
+```
+
+:::
+
+## Authentication
+
+Register the Datalibweb token (from the Datalibweb website) once every 30 days:
+
+::: {.panel-tabset}
+
+## R
+
+```r
+dlw_set_token("<your Datalibweb token>")   # stored in the system keyring
+```
+
+## Stata
+
+```stata
+datalibweb, token(<your Datalibweb token>) version(2)
+```
+
+:::
+
+For citation guidance and further options (e.g. PPP conversion on load), see the `datalibweb` help file in Stata and the [Datalibweb guidelines](https://github.com/worldbank/datalibweb); questions to the Datalibweb team at `datalibweb@worldbank.org`.

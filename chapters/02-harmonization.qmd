@@ -6,8 +6,28 @@ date: today
 
 ## Overview
 
-Once raw microdata is available on Datalibweb, it is harmonized to the **50by30 schema** (see [Schema & Variable Dictionary](04-schema.qmd)). Harmonization maps survey-specific variables, codes, and units onto the mandatory and optional variables defined by the schema, so that welfare and self-reliance indicators are comparable across surveys, countries, and years.
+Once raw microdata is available on Datalibweb, it is harmonized to the **50by35 schema** (see [Schema & Variable Dictionary](05-schema.qmd)). Harmonization maps survey-specific variables, codes, and units onto the mandatory and optional variables defined by the schema, so that welfare and self-reliance indicators are comparable across surveys, countries, and years.
 
 ## Sample harmonization scripts
 
-Sample harmonization scripts are available in the [`50by30-data` repository](https://github.com/worldbank/50by30-data) for reference. They are not intended to be used as-is, but rather to illustrate the harmonization process and provide a starting point for writing survey-specific scripts.
+Example harmonization scripts for three surveys are available in the `Stata/` folder of this repository. They are not intended to be used as-is, but illustrate the harmonization process and provide a starting point for writing survey-specific scripts:
+
+| Script | Survey | Welfare measure |
+|---|---|---|
+| `Stata/harmonize_TCD_2022_EHCVM.do` | Chad EHCVM 2022 | Consumption (spatially deflated) |
+| `Stata/harmonize_COL_2023_GEIH.do` | Colombia GEIH 2023 | Income (annualized from monthly) |
+| `Stata/harmonize_UGA_2018_RHS.do` | Uganda Refugee & Host Communities HH Survey 2018 | Consumption (annualized from monthly) |
+
+The scripts read the raw data from the folder given by the `REFUGEE_RAW_DATA` environment variable and write the harmonized file to `data/processed/` (gitignored — harmonized microdata is never committed to this repository). Common conventions across all three:
+
+- **Sample**: refugees only — the 50by35 monitoring population.
+- **`welfare`**: the survey's official welfare aggregate, converted to **annual per capita LCU**.
+- **`welfare_self`**: welfare net of humanitarian/social **assistance income** (per capita, same periodicity and deflation as `welfare`), floored at zero. Where the source provides a net-of-aid aggregate directly (e.g. Uganda's `cons_agg_less_aid`), that is used. Confirm the final definition with the 50by35 methodology team.
+- **Sentinel codes** (e.g. `age == 9999`) are converted to system missing.
+
+After harmonizing, check the file against the schema before upload:
+
+```stata
+use "data/processed/<SurveyID>_WELF.dta", clear
+do "Stata/validate_50by35.do"
+```
