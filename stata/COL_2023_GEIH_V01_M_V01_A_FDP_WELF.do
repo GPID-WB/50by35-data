@@ -25,7 +25,7 @@ if `"`rawroot'"' == "" {
     exit 601
 }
 local outdir : env FIFTYBY35_PROCESSED
-if `"`outdir'"' == "" local outdir "data/processed"
+if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- merge individual and household data ---------------------------------
 use "`rawroot'/Colombia/GEIH/individual_data_2023.dta", clear

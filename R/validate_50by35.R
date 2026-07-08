@@ -12,16 +12,16 @@
 validate_50by35 <- function(df) {
   fail <- function(...) stop("SCHEMA ERROR: ", ..., call. = FALSE)
 
-  mandatory <- c("countrycode", "year", "hhid", "pid", "welfare",
+  mandatory <- c("code", "year", "hhid", "pid", "welfare",
                  "welfare_type", "welfare_self", "weight", "camp", "urban")
   missing_vars <- setdiff(mandatory, names(df))
   if (length(missing_vars))
     fail("mandatory variable(s) missing: ", paste(missing_vars, collapse = ", "))
 
   # identifiers: strings, 3-letter country code, unique hhid x pid
-  for (v in c("countrycode", "hhid", "pid"))
+  for (v in c("code", "hhid", "pid"))
     if (!is.character(df[[v]])) fail(v, " must be a string")
-  if (any(nchar(df$countrycode) != 3)) fail("countrycode must be a 3-letter code")
+  if (any(nchar(df$code) != 3)) fail("code must be a 3-letter code")
   if (anyDuplicated(df[c("hhid", "pid")])) fail("hhid + pid do not uniquely identify rows")
 
   # missing values (camp/urban may be missing)

@@ -21,7 +21,7 @@ clear
 set more off
 
 local outdir : env FIFTYBY35_PROCESSED
-if `"`outdir'"' == "" local outdir "data/processed"
+if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- parameters: uncomment ONE survey block ------------------------------
 local processid 40                       // FDP-harmonized-data

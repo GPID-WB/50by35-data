@@ -25,7 +25,7 @@ if `"`rawroot'"' == "" {
     exit 601
 }
 local outdir : env FIFTYBY35_PROCESSED
-if `"`outdir'"' == "" local outdir "data/processed"
+if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- household level ----------------------------------------------------
 use "`rawroot'/Uganda/UGA_hh.dta", clear

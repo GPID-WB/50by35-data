@@ -129,8 +129,7 @@ up <- primus_upload(
   survey_id    = survey_id,
   type         = "harmonized",
   infile       = xml_file,
-  xml          = xml_file,
-  folder_name  = "Data/Harmonized"
+  xml          = xml_file
 )
 message("Opened transaction ", up$transaction_id)
 

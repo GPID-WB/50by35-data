@@ -9,7 +9,7 @@ Usage:  use "<harmonized file>.dta", clear
 ===================================================================== */
 
 * ---- mandatory variables present -----------------------------------------
-foreach v in countrycode year hhid pid welfare welfare_type welfare_self ///
+foreach v in code year hhid pid welfare welfare_type welfare_self ///
              weight camp urban {
     capture confirm variable `v'
     if _rc {
@@ -19,14 +19,14 @@ foreach v in countrycode year hhid pid welfare welfare_type welfare_self ///
 }
 
 * ---- identifier types and uniqueness --------------------------------------
-capture confirm string variable countrycode hhid pid
+capture confirm string variable code hhid pid
 if _rc {
-    di as error "SCHEMA ERROR: countrycode, hhid and pid must be strings"
+    di as error "SCHEMA ERROR: code, hhid and pid must be strings"
     exit 459
 }
-capture assert strlen(countrycode)==3
+capture assert strlen(code)==3
 if _rc {
-    di as error "SCHEMA ERROR: countrycode must be a 3-letter code"
+    di as error "SCHEMA ERROR: code must be a 3-letter code"
     exit 459
 }
 capture isid hhid pid
