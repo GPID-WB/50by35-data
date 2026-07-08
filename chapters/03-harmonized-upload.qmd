@@ -44,6 +44,9 @@ Upload the code used to harmonize the raw data together with the harmonized data
 | `Data/Harmonized` | `dta` |
 :::
 
+These code examples are condensed; see the full scripts in this repository.
+}
+
 ::: {.panel-tabset}
 
 ## R
@@ -76,8 +79,7 @@ sr <- weighted.mean(df$welfare_self/365/df$cpi2021/df$icp2021 >= 3.00, df$weight
 
 # 4. The XML opens the transaction; then attach the data and programs
 up <- primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
-                    infile = "indicator.xml", xml = "indicator.xml",
-                    folder_name = "Data/Harmonized")
+                    infile = "indicator.xml", xml = "indicator.xml")
 primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
               infile = paste0("data/processed/", survey_id, "_WELF.dta"),
               folder_name = "Data/Harmonized", transaction_id = up$transaction_id)
