@@ -50,7 +50,7 @@ local ppp_override .
 use "`dtafile'", clear
 do "Stata/validate_50by35.do"
 
-local ccode = countrycode[1]
+local ccode = code[1]
 local year  = year[1]
 
 * ---- CPI / PPP conversion factors from PIP, pinned to the 2021 framework ---
@@ -141,7 +141,7 @@ local tranxid = r(prmTransId)
 di as result "Opened transaction `tranxid'"
 
 primus upload, processid(`processid') surveyid(`surveyid') ///
-    type(harmonized) folderpath(Data/Stata) infile("`dtafile'") tranxid(`tranxid')
+    type(harmonized) folderpath(Data/Harmonized) infile("`dtafile'") tranxid(`tranxid')
 
 * harmonization code makes the upload reproducible from source
 primus upload, processid(`processid') surveyid(`surveyid') ///

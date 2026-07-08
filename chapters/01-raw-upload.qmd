@@ -1,17 +1,16 @@
 ---
 title: "Upload Raw Data"
-author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
 ## Overview
 
-Before a survey can be harmonized, its raw microdata should exist on **Datalibweb**. If a raw dataset is not already available there (e.g. on the GMD server), it must first be uploaded through
+Before a survey can be harmonized, its raw microdata should exist on **datalibweb**. If a raw dataset is not already available there (e.g. on the GMD or region server), it must first be uploaded through
 **PRIMUS**.
 
 ::: {.callout-tip}
 ## Check first
-Query Datalibweb to confirm whether the raw survey is already present before starting a new upload transaction.
+Query datalibweb to confirm whether the raw survey is already present before starting a new upload transaction.
 :::
 
 ## Uploading via PRIMUS
@@ -20,10 +19,15 @@ Raw files are uploaded as a PRIMUS **transaction** using the `FDPRaw-data` proce
 
 ::: {.callout-tip}
 ## Include supporting documents
-Upload the survey **documentation and questionnaires** together with the raw data (to the process's documents folder, e.g. `Doc/`), so the source instruments travel with the microdata on Datalibweb. Add them as additional files on the same transaction ID.
+Upload the survey **documentation and questionnaires** together with the raw data, so the source instruments travel with the microdata on datalibweb. Add them as additional files on the same transaction ID, using the folder path matching the file type:
+
+| Folder path | Extensions |
+|---|---|
+| `Doc/Questionnaires` | `doc`, `docx`, `pdf`, `rar`, `xls`, `xlsx`, `zip` |
+| `Data/Stata` | `dta` |
 :::
 
-A web interface and two clients are available to interact with PRIMUS: the [`primus` R package](https://github.com/worldbank/primus-r) (cross-platform) and the [`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows). Both call the same PRIMUS API; use whichever matches your harmonization workflow.
+Users can interact with PRIMUS via the [web interface](https://primusuiprod.ase.worldbank.org) or programmatically using two clients: the [`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows) or the [`primus` R package](https://github.com/worldbank/primus-r) (cross-platform). Both call the same PRIMUS API; use whichever matches your harmonization workflow.
 
 ::: {.panel-tabset}
 
@@ -54,6 +58,16 @@ primus_upload(
   type           = "raw",
   infile         = "individual_data_2023.dta",
   folder_name    = "Data/Stata",
+  transaction_id = up$transaction_id
+)
+
+# Include the survey questionnaire/documentation on the same transaction
+primus_upload(
+  process_name   = "FDPRaw-data",
+  survey_id      = "COL_2023_GEIH_V01_M",
+  type           = "raw",
+  infile         = "questionnaire.pdf",
+  folder_name    = "Doc/Questionnaires",
   transaction_id = up$transaction_id
 )
 
@@ -91,6 +105,11 @@ primus upload, proc(39) surveyid(COL_2023_GEIH_V01_M) ///
     type(raw) folderpath(Data/Stata) infile(c:\Temp\individual_data_2023.dta) ///
     tranxid(`tranxid')
 
+* Include the survey questionnaire/documentation on the same transaction
+primus upload, proc(39) surveyid(COL_2023_GEIH_V01_M) ///
+    type(raw) folderpath(Doc/Questionnaires) infile(c:\Temp\questionnaire.pdf) ///
+    tranxid(`tranxid')
+
 * Alternatively, upload a zip that mirrors the process folder structure
 primus upload, processid(39) surveyid(COL_2023_GEIH_V01_M) ///
     type(raw) infile(c:\Temp\COL_2023_GEIH_V01_M.zip) zip new
@@ -104,37 +123,27 @@ primus action, tranxid(`tranxid') proc(39) ///
 
 ## Authentication
 
-Both clients use the same **datalibweb token** (valid 30 days, renewed on the
-Datalibweb website).
+Both clients use the same **datalibweb token** (valid 30 days, renewed on the [datalibweb website](https://datalibweb2.worldbank.org)).
 
 ::: {.panel-tabset}
 
 ## R
 
-`primus` defaults to the **plugin gateway**, which reuses the same Datalibweb bearer
-token as the `dlw` R package. Store it once (shared with `dlw`):
-
 ```r
-primus_set_token("<your Datalibweb token>")
+primus_set_token("<your datalibweb token>")
 ```
-
-See the package's `authentication` vignette for the Azure AD gateway, used only for
-endpoints not exposed on the plugin gateway.
 
 ## Stata
 
-Register the token copied from the Datalibweb website before running PRIMUS
-commands:
-
 ```stata
-primus register, token(<your Datalibweb token>)
+primus register, token(<your datalibweb token>)
 ```
 
 :::
 
 ## Reviewing & approving via PRIMUS
 
-Once the uploader confirms the transaction, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. If approved, the files are published to Datalibweb and become available for harmonization. If rejected, the uploader is notified and can correct the files and resubmit.
+Once the uploader confirms the transaction, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. If approved, the files are published to datalibweb and become available for harmonization. If rejected, the uploader is notified and can revise the files and resubmit.
 
 The raw files become the input to the [harmonization step](02-harmonization.qmd).
 

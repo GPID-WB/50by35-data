@@ -9,14 +9,15 @@ See the [contributor guide](wiki/contributing.md) before making changes.
 :::
 
 
-This book documents the process to **upload, harmonize, and review** microdata used to monitor the UNHCR **50by35 vision**: that 50 percent of refugees in protracted crises are self-reliant by 2035.
+This book documents the pipeline to **harmonize and publish** microdata used to monitor the UNHCR **50by35 vision**: that 50 percent of refugees in protracted crises are self-reliant by 2035.
 
 ## The Pipeline at a Glance
 
 ```{mermaid}
 %%| label: fig-pipeline
 %%| fig-cap: "The 50by35 microdata pipeline"
-%%| fig-width: 8
+%%| fig-width: 13
+%%{init: {"flowchart": {"nodeSpacing": 60, "rankSpacing": 80}, "themeVariables": {"fontSize": "30px"}}}%%
 flowchart LR
     raw["<b>1 · Upload<br/>raw<br/>data</b>"]
     rawrev{"<b>2 · Review</b>"}
@@ -45,12 +46,20 @@ flowchart LR
 
 The pipeline is documented here in three parts:
 
-1. **[Upload Raw Data](chapters/01-raw-upload.qmd)** — raw microdata and documentation are uploaded via **PRIMUS**, unless it is already available from **datalibweb**.
-2. **[Harmonize Data](chapters/02-harmonization.qmd)** — approved raw data is harmonized to the 50by35 schema.
-3. **[Upload Harmonized Data](chapters/03-review-approval.qmd)** — harmonized microdata and harmonization scripts are uploaded via **PRIMUS**. Approved files are published to **datalibweb** for 50by35 monitoring.
+1. **[Upload Raw Data](chapters/01-raw-upload.qmd)** — raw microdata and documentation are uploaded to **PRIMUS**. Approved files are published to **datalibweb** for harmonization.
+2. **[Harmonize Data](chapters/02-harmonization.qmd)** — raw microdata is harmonized to the 50by35 schema.
+3. **[Upload Harmonized Data](chapters/03-harmonized-upload.qmd)** — harmonized microdata and harmonization scripts are uploaded to **PRIMUS**. Approved files are published to **datalibweb** for 50by35 monitoring.
+
+::: {.callout-note}
+## Key systems
+- [**PRIMUS**](https://primusuiprod.ase.worldbank.org) (Primary Review of Indicators and Microdata Upload System) is the World Bank's "clearing" platform for data. It allows for the review and approval of data and derived indicators by relevant parties. PRIMUS is the only way to deposit files into secure cloud storage from which datalibweb reads.
+- [**datalibweb**](https://datalibweb2.worldbank.org) is a World Bank data system designed to give users access to raw and harmonized household surveys from many microdata collections for analysis.
+:::
 
 ## Accessing data
-Approved raw and harmonized data are available from **datalibweb**. The raw data collection is `FDPRAW`, while the harmonized data collection is `FDP` with the harmonized module `WELF`. See the [Access Data](chapters/04-access.qmd) chapter for details.
+Raw and harmonized data that have been approved in **PRIMUS** are available from **datalibweb**. In datalibweb, the raw data collection is named `FDPRAW` and the harmonized data collection is `FDP` with harmonized module `WELF`. 
+
+See the [Access Data](chapters/04-access.qmd) chapter for details.
 
 ## Harmonized Schema
 
@@ -67,12 +76,12 @@ See the [Schema & Variable Dictionary](chapters/05-schema.qmd) for the full vari
 value ranges, and labeling conventions.
 
 ## Calculating the 50by35 Self-Reliance Indicator from Harmonized Microdata
-The share of the population defined as self-reliant can be calculated from these two variables and the relevant CPI and PPP adjustment factors as follows:
+The share of the population defined as self-reliant can be calculated as follows:
 
 $$
 SR = \frac{\displaystyle\sum_{i=1}^{n} \mathbb{1}\left[\dfrac{\text{welfare\_self}_i}{365 \times CPI \times PPP} \geq z\right] \cdot \text{weight}_i}{\displaystyle\sum_{i=1}^{n} \text{weight}_i}
 $$
 
-where $z$ is the reference poverty line (in daily PPP terms), $\mathbb{1}[\cdot]$ is an indicator function equal to 1 if the condition holds and 0 otherwise, `welfare_self` is divided by 365 to convert the annual measure to a daily rate, and the sums run over all $n$ individuals $i$ in the sample.
+where $z$ is the reference poverty line (in daily PPP terms), $\mathbb{1}[\cdot]$ is an indicator function equal to 1 if the condition holds and 0 otherwise, `welfare_self` is divided by 365 to convert the annual adjusted welfare aggregate to a daily rate, and the sums run over all $n$ individuals $i$ in the sample. CPI and PPP are the consumer price index and purchasing power parity adjustment factors, respectively, since `welfare_self` is expressed in current local currency units.
 
 

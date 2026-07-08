@@ -1,19 +1,20 @@
 ---
 title: "Upload Harmonized Data"
-author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
 ## Overview
-Harmonized microdata and harmonization scripts are uploaded to **Datalibweb** via **PRIMUS**. After review, approved files are published to Datalibweb for 50by35 monitoring.
+Harmonized microdata and harmonization scripts are uploaded to **datalibweb** via **PRIMUS**. After review, approved files are published to datalibweb for 50by35 monitoring.
 
 ## Uploading via PRIMUS
 
 Harmonized files are uploaded as a PRIMUS **transaction** using the `FDP-harmonized-data` process (`processid = 40`) by users with uploader status. 
 
-All harmonized files must pass validation checks before they can be uploaded to Datalibweb. These confirm that the harmonized file conforms to the schema, and that mandatory variables are present and non-missing. Any deviation from the schema will trigger an error and prevent the harmonized file from being uploaded to Datalibweb. They check for missing values in mandatory variables, for negative or zero values in `welfare` and `weight`, and that `welfare_self` is not greater than `welfare`. Households where `hhsize` differs from the number of `pid` records are flagged with a warning (rosters can be incomplete, and refugee-only samples keep a subset of household members). The validation scripts are `Stata/validate_50by35.do` and `R/validate_50by35.R` in this repository.
+All harmonized files must pass validation checks before they can be uploaded to datalibweb. These confirm that the harmonized file conforms to the schema, and that mandatory variables are present and non-missing. Any deviation from the schema will trigger an error and prevent the harmonized file from being uploaded to datalibweb. They check for missing values in mandatory variables, for negative or zero values in `welfare` and `weight`, and that `welfare_self` is not greater than `welfare`. Households where `hhsize` differs from the number of `pid` records are flagged with a warning (rosters can be incomplete, and refugee-only samples keep a subset of household members). The validation scripts are `Stata/validate_50by35.do` and `R/validate_50by35.R` in this repository.
 
-A harmonized data upload starts with an **indicator `.xml`** file that opens the transaction and returns a transaction ID. The XML contains metadata about the harmonized file, the poverty headcount from `welfare`, and the **50by35 self-reliance share** computed from `welfare_self` at the $3.00/day 2021 PPP line — the values the reviewer approves. PRIMUS leaves the XML's content to each team, provided it follows the `<PRIMUS_ANALYSIS>` heading format; both upload scripts in this repository write the same compact document.
+A harmonized data upload starts with an **indicator `.xml`** file that opens the transaction and returns a transaction ID. The XML contains metadata about the harmonized file, the poverty headcount from `welfare`, and the **50by35 self-reliance share** computed from `welfare_self` at the $3.00/day 2021 PPP line — the values the reviewer approves. 
+
+PRIMUS leaves the XML's content to each team, provided it follows the `<PRIMUS_ANALYSIS>` heading format; both upload scripts in this repository write the same compact document.
 
 ### CPI and PPP conversion factors {#sec-cpi-ppp}
 
@@ -35,7 +36,12 @@ After uploading, the uploader confirms the draft transaction. Only then does it 
 
 ::: {.callout-tip}
 ## Include the harmonization scripts
-Upload the code used to harmonize the raw data (e.g. the `.do` or `.R` files) together with the harmonized dataset, to the **`Programs/`** folder on Datalibweb. Add them as additional files on the same transaction ID so the harmonization is fully reproducible from source.
+Upload the code used to harmonize the raw data together with the harmonized dataset, so the harmonization is fully reproducible from source. Add them as additional files on the same transaction ID, using the folder path matching the file type:
+
+| Folder path | Extensions |
+|---|---|
+| `Programs` | `do`, `py`, `r` |
+| `Data/Harmonized` | `dta` |
 :::
 
 ::: {.panel-tabset}
@@ -71,10 +77,10 @@ sr <- weighted.mean(df$welfare_self/365/df$cpi2021/df$icp2021 >= 3.00, df$weight
 # 4. The XML opens the transaction; then attach the data and programs
 up <- primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
                     infile = "indicator.xml", xml = "indicator.xml",
-                    folder_name = "Data/Stata")
+                    folder_name = "Data/Harmonized")
 primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
               infile = paste0("data/processed/", survey_id, "_WELF.dta"),
-              folder_name = "Data/Stata", transaction_id = up$transaction_id)
+              folder_name = "Data/Harmonized", transaction_id = up$transaction_id)
 primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
               infile = "Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do",
               folder_name = "Programs", transaction_id = up$transaction_id)
@@ -106,7 +112,7 @@ primus upload, processid(40) surveyid(`surveyid') ///
 local tranxid = r(prmTransId)
 
 primus upload, proc(40) surveyid(`surveyid') type(harmonized) ///
-    folderpath(Data/Stata) infile("data/processed/`surveyid'_WELF.dta") tranxid(`tranxid')
+    folderpath(Data/Harmonized) infile("data/processed/`surveyid'_WELF.dta") tranxid(`tranxid')
 
 primus upload, proc(40) surveyid(`surveyid') type(harmonized) ///
     folderpath(Programs) infile("Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do") tranxid(`tranxid')
@@ -122,7 +128,7 @@ primus action, tranxid(`tranxid') proc(40) ///
 
 Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. 
 
-Approved harmonized files are published to Datalibweb and used to monitor the 50by35 self-reliance indicator. Rejected files are returned to the uploader for correction and resubmission.
+Approved harmonized files are published to datalibweb and used to monitor the 50by35 self-reliance indicator. Rejected files are returned to the uploader for correction and resubmission.
 
 ::: {.callout-warning}
 ## Note

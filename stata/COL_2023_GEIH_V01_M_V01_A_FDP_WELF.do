@@ -36,7 +36,7 @@ replace refugee = 0 if cbirth==170
 keep if refugee==1
 
 * ---- schema variables ----------------------------------------------------
-gen str3 countrycode = "COL"
+gen str3 code = "COL"
 gen int  year        = survey_year
 
 * welfare: official GEIH income aggregate ingpcug (monthly per capita of
@@ -95,7 +95,7 @@ foreach v in welfare_type male urban camp educat4 empstat {
     label values `v' `v'
 }
 
-label variable countrycode  "Country code"
+label variable code  "Country code"
 label variable year         "Survey year"
 label variable hhid         "Household identifier"
 label variable pid          "Person identifier"
@@ -111,9 +111,9 @@ label variable male         "Sex"
 label variable educat4      "Highest education (4 cat.)"
 label variable empstat      "Employment status"
 
-keep  countrycode year hhid pid welfare welfare_type welfare_self weight ///
+keep  code year hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
-order countrycode year hhid pid welfare welfare_type welfare_self weight ///
+order code year hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
 
 isid hhid pid

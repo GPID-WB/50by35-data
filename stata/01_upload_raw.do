@@ -33,7 +33,7 @@ local files     `""`rawroot'/Chad/household_TCD_2022.dta" "`rawroot'/Chad/indivi
 *local surveyid  "UGA_2018_RHS_V01_M"
 *local files     `""`rawroot'/Uganda/UGA_hh.dta" "`rawroot'/Uganda/UGA_ind.dta""'
 
-* Optional supporting documents (questionnaires, reports) for the Doc/ folder
+* Optional supporting documents (questionnaires, reports) for the Doc/Questionnaires folder
 local docs      ""
 
 * ---- upload: first file opens a NEW transaction ---------------------------
@@ -55,7 +55,7 @@ foreach f of local files {
 * questionnaires and documentation travel with the microdata
 foreach f of local docs {
     primus upload, processid(`processid') surveyid(`surveyid') ///
-        type(raw) folderpath(Doc) infile("`f'") tranxid(`tranxid')
+        type(raw) folderpath(Doc/Questionnaires) infile("`f'") tranxid(`tranxid')
 }
 
 * ---- confirm the draft so it becomes visible to approvers -----------------

@@ -56,7 +56,7 @@ di as txt "Dropping " r(N) " observations with missing consumption aggregate"
 drop if missing(welfare)
 
 * ---- schema variables ----------------------------------------------------
-gen str3 countrycode = country_3digit
+gen str3 code = country_3digit
 gen int  year        = survey_year
 
 rename hh hhid                        // str32
@@ -98,7 +98,7 @@ foreach v in welfare_type male urban camp educat4 empstat {
     label values `v' `v'
 }
 
-label variable countrycode  "Country code"
+label variable code  "Country code"
 label variable year         "Survey year"
 label variable hhid         "Household identifier"
 label variable pid          "Person identifier"
@@ -114,9 +114,9 @@ label variable male         "Sex"
 label variable educat4      "Highest education (4 cat.)"
 label variable empstat      "Employment status"
 
-keep  countrycode year hhid pid welfare welfare_type welfare_self weight ///
+keep  code year hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
-order countrycode year hhid pid welfare welfare_type welfare_self weight ///
+order code year hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
 
 isid hhid pid

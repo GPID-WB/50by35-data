@@ -1,12 +1,11 @@
 ---
 title: "Access Data"
-author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
 ## Overview
 
-Approved files are distributed through **Datalibweb**, in two collections (servers):
+Approved files are distributed through **datalibweb**, in two collections (servers):
 
 | Collection | Content |
 |---|---|
@@ -15,11 +14,11 @@ Approved files are distributed through **Datalibweb**, in two collections (serve
 
 The harmonized welfare module in the `FDP` collection is called **`WELF`**.
 
-Two clients are available: the [`datalibweb` Stata package](https://github.com/worldbank/datalibweb) and the [`dlw` R package](https://github.com/worldbank/dlw). Both require the World Bank intranet/VPN, permission to access the collections, and the same Datalibweb token used by PRIMUS (valid 30 days, renewed on the Datalibweb website).
+Two clients are available: the [`datalibweb` Stata package](https://github.com/worldbank/datalibweb) and the [`dlw` R package](https://github.com/worldbank/dlw). Both require the World Bank intranet/VPN, permission to access the collections, and the same datalibweb token used by PRIMUS (valid 30 days, renewed on the datalibweb website).
 
 ## File naming conventions
 
-Datalibweb survey identifiers guarantee replicability: versions are **never replaced** — new releases get a new version number, and previous vintages remain available. Always record the full survey ID used in an analysis.
+datalibweb survey identifiers guarantee replicability: versions are **never replaced** — new releases get a new version number, and previous vintages remain available. Always record the full survey ID used in an analysis.
 
 **Raw (master) data** in `FDPRAW`:
 
@@ -99,9 +98,12 @@ df <- dlw_get_data(
   server       = "FDP"
 )
 
-# a raw file from the FDPRAW collection
+# a raw file from the FDPRAW collection; year and survey (acronym) disambiguate
+# the specific survey vintage — the R equivalent of Stata's surveyid()
 raw <- dlw_get_data(
   country_code = "COL",
+  year         = 2023,
+  survey       = "GEIH",
   filename     = "individual_data_2023.dta",
   server       = "FDPRAW"
 )
@@ -130,22 +132,22 @@ datalibweb, country(COL TCD UGA) years(2018 2022 2023) type(FDP) mod(WELF) clear
 
 ## Authentication
 
-Register the Datalibweb token (from the Datalibweb website) once every 30 days:
+Register the datalibweb token (from the datalibweb website) once every 30 days:
 
 ::: {.panel-tabset}
 
 ## R
 
 ```r
-dlw_set_token("<your Datalibweb token>")   # stored in the system keyring
+dlw_set_token("<your datalibweb token>")   # stored in the system keyring
 ```
 
 ## Stata
 
 ```stata
-datalibweb, token(<your Datalibweb token>) version(2)
+datalibweb, token(<your datalibweb token>) version(2)
 ```
 
 :::
 
-For citation guidance and further options (e.g. PPP conversion on load), see the `datalibweb` help file in Stata and the [Datalibweb guidelines](https://github.com/worldbank/datalibweb); questions to the Datalibweb team at `datalibweb@worldbank.org`.
+For citation guidance and further options (e.g. PPP conversion on load), see the `datalibweb` help file in Stata and the [datalibweb guidelines](https://github.com/worldbank/datalibweb); questions to the datalibweb team at `datalibweb@worldbank.org`.

@@ -7,7 +7,7 @@ book:
   subtitle: "Harmonize and publish microdata used to monitor the UNHCR 50by35 Vision"
   date: today
   author:
-    - name: "World Bank / UNHCR Joint Team"
+    - name: "World Bank Group"
   repo-url: https://github.com/GPID-WB/50by35-data
   repo-actions: [edit, issue]
   chapters:
@@ -16,7 +16,7 @@ book:
       chapters:
         - chapters/01-raw-upload.qmd
         - chapters/02-harmonization.qmd
-        - chapters/03-review-approval.qmd
+        - chapters/03-harmonized-upload.qmd
     - part: "Access"
       chapters:
         - chapters/04-access.qmd

@@ -58,7 +58,7 @@ ppp_override <- NA
 df <- read_dta(dta_file)
 validate_50by35(df)
 
-ccode <- df$countrycode[1]
+ccode <- df$code[1]
 year  <- df$year[1]
 
 # ---- CPI / PPP conversion factors from PIP, pinned to the 2021 framework ------
@@ -130,7 +130,7 @@ up <- primus_upload(
   type         = "harmonized",
   infile       = xml_file,
   xml          = xml_file,
-  folder_name  = "Data/Stata"
+  folder_name  = "Data/Harmonized"
 )
 message("Opened transaction ", up$transaction_id)
 
@@ -139,7 +139,7 @@ primus_upload(
   survey_id      = survey_id,
   type           = "harmonized",
   infile         = dta_file,
-  folder_name    = "Data/Stata",
+  folder_name    = "Data/Harmonized",
   transaction_id = up$transaction_id
 )
 

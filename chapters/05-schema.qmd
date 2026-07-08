@@ -1,26 +1,19 @@
 ---
 title: "Schema & Variable Dictionary"
-author: "World Bank / UNHCR Joint Team"
 date: today
 ---
 
 ::: {.callout-important}
 ## Status
 This variable dictionary is a working draft. Confirm the final variable
-list, value-label codes, and the precise definition of `welfare_self` with the
-50by35 methodology team before treating it as authoritative.
+list, value-label codes, and the precise definition of `welfare_self` with the 50by35 methodology team before treating it as authoritative.
 :::
 
 ## Overview
 
-Every harmonized file uploaded and approved through the pipeline must conform to
-this schema. Variables are grouped into **mandatory** (must be present and
-non-missing per the rules of the variable) and **optional** (included when
-available in the source survey).
+Every harmonized file uploaded and approved through the pipeline must conform to this schema. Variables are grouped into **mandatory** (must be present and non-missing per the rules of the variable) and **optional** (included when available in the source survey).
 
-The **unit of observation** is the individual: one row per person, with
-household-level variables (e.g. `welfare`, `hhid`) repeated across all
-members of the same household.
+The **unit of observation** is the individual: one row per person, with household-level variables (e.g. `welfare`, `hhid`) repeated across all members of the same household.
 
 ## Conventions
 
@@ -39,21 +32,22 @@ members of the same household.
 
 | Variable | Label | Type | Unit / range | Missing | Notes |
 |---|---|---|---|---|---|
-| `countrycode` | Country code | `str3` | ISO / WDI 3-letter | Not allowed | e.g. `AGO`, `ETH` |
+| `code` | Country code | `str3` | ISO / WDI 3-letter | Not allowed | e.g. `AGO`, `ETH` |
 | `year` | Survey year | `int` | 1990–2035 | Not allowed | Four-digit year of data collection |
+| `survname` | Survey name | `str#` | — | Not allowed | Survey acronym (e.g. `GEIH`, `EHCVM`, `RHS`) |
 | `hhid` | Household identifier | `str` | — | Not allowed | Unique per household within the survey; string to preserve leading zeros |
 | `pid` | Person identifier | `str` | — | Not allowed | Unique per individual within the survey |
 | `welfare` | Welfare aggregate | `double` | > 0, LCU, annual per capita | Not allowed | Consumption or income aggregate from the survey's official poverty methodology  | 
-| `welfare_type` | Welfare measure type | `byte` | `1`–`3` | Not allowed | `1` = Consumption, `2` = Income, `3` = Expenditure |
 | `welfare_self` | Self-reliance-adjusted welfare | `double` | ≥ 0, LCU, annual per capita | Not allowed | Welfare measure used for the 50by35 self-reliance indicator |
+| `welfare_type` | Welfare measure type | `byte` | `1`–`3` | Not allowed | `1` = Consumption, `2` = Income, `3` = Expenditure |
 | `weight` | Sampling weight | `double` | > 0 | Not allowed | Individual sampling/population weight |
 | `camp` | Camp/non-camp | `byte` | `0`/`1` | Allowed | `0` = Non-camp, `1` = Camp |
-| `urban` | Urban/rural | `byte` | `0`/`1` | Allowed | `0` = Rural, `1` = Urban |
 
 ## Optional Variables
 
 | Variable | Label | Type | Unit / range | Notes |
 |---|---|---|---|---|
+| `urban` | Urban/rural | `byte` | `0`/`1` | `0` = Rural, `1` = Urban |
 | `hhsize` | Household size | `int` | ≥ 1 | Number of household members |
 | `age` | Age | `double` | 0–120 years | Decimal allowed for children under 5 (per GMD 2.0); integer otherwise |
 | `male` | Sex | `byte` | `0`/`1` | `0` = Female, `1` = Male |
@@ -88,14 +82,6 @@ Categorical variables must use these codes and labels exactly.
 
 ## Validation
 
-These variables and value-label codes are enforced by the validation scripts
-(`Stata/validate_50by35.do`, `R/validate_50by35.R`), which run before every
-harmonized upload. Any deviation from the schema triggers an error and prevents
-the harmonized file from being uploaded to Datalibweb. The checks cover missing
-values in mandatory variables, negative or zero values in `welfare` and
-`weight`, and that `welfare_self` is not greater than `welfare`. Households
-where `hhsize` differs from the number of `pid` records are flagged with a
-warning rather than an error, since rosters can be incomplete and refugee-only
-samples keep a subset of household members.
+These variables and value-label codes are enforced by the validation scripts (`Stata/validate_50by35.do`, `R/validate_50by35.R`), which run before every harmonized upload. Any deviation from the schema triggers an error and prevents the harmonized file from being uploaded to datalibweb. The checks cover missing values in mandatory variables, negative or zero values in `welfare` and `weight`, and that `welfare_self` is not greater than `welfare`. Households where `hhsize` differs from the number of `pid` records are flagged with a warning rather than an error, since rosters can be incomplete and refugee-only samples keep a subset of household members.
 
 

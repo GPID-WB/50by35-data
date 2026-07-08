@@ -33,7 +33,7 @@ filesystem. When adding/removing/reordering chapters, update the `book.chapters`
 — adding a `.qmd` file under `chapters/` alone has no effect on the rendered book.
 
 Current structure: `index.qmd` → Part "Pipeline" (`01-raw-upload.qmd`, `02-harmonization.qmd`,
-`03-review-approval.qmd`, `04-access.qmd`) → Part "Reference" (`05-schema.qmd`).
+`03-harmonized-upload.qmd`, `04-access.qmd`) → Part "Reference" (`05-schema.qmd`).
 
 ### The pipeline the book documents
 
@@ -44,7 +44,7 @@ Three real-world stages, each mapped to a chapter:
    by a separate approver role before it becomes available for harmonization.
 2. **Harmonize data** (`02-harmonization.qmd`) — approved raw data is mapped to the 50by35
    schema (see `05-schema.qmd`).
-3. **Upload harmonized data** (`03-review-approval.qmd`) — harmonized data + harmonization
+3. **Upload harmonized data** (`03-harmonized-upload.qmd`) — harmonized data + harmonization
    scripts uploaded via PRIMUS (process `FDP-harmonized-data`, processid 40), validated
    against the schema, then reviewed/approved for publication to Datalibweb.
 4. **Access data** (`04-access.qmd`) — approved data accessed from Datalibweb: collections
@@ -64,7 +64,7 @@ Working example scripts live in `Stata/` (harmonization + PRIMUS steps + validat
 Defines the harmonized `.dta` file contract: one row per individual, mandatory vs. optional
 variables, Stata storage types, allowed missingness, and value-label codes. This is the
 authoritative reference other chapters point to — validation rules described in
-`03-review-approval.qmd` (missing mandatory vars, `welfare_self <= welfare`, `hhsize`
+`03-harmonized-upload.qmd` (missing mandatory vars, `welfare_self <= welfare`, `hhsize`
 consistency with `pid` counts per `hhid`) must match what's documented here. The schema is
 explicitly marked as a **working draft** pending sign-off from the 50by35 methodology team.
 

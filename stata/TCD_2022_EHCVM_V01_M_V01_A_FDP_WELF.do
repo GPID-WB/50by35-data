@@ -45,7 +45,7 @@ drop _merge
 keep if inlist(pop_group, 1, 2, 6)
 
 * ---- schema variables ----------------------------------------------------
-gen str3 countrycode = "TCD"
+gen str3 code = "TCD"
 gen int  year        = surveyyear
 
 * identifiers: rebuild hhid from grappe/menage (raw hhid is numeric float)
@@ -90,7 +90,7 @@ foreach v in welfare_type male urban camp educat4 empstat {
     label values `v' `v'
 }
 
-label variable countrycode  "Country code"
+label variable code  "Country code"
 label variable year         "Survey year"
 label variable hhid         "Household identifier"
 label variable pid          "Person identifier"
@@ -107,9 +107,9 @@ label variable educat4      "Highest education (4 cat.)"
 label variable empstat      "Employment status"
 label variable psu          "Primary sampling unit"
 
-keep  countrycode year hhid pid welfare welfare_type welfare_self weight ///
+keep  code year hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat psu
-order countrycode year hhid pid welfare welfare_type welfare_self weight ///
+order code year hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat psu
 
 isid hhid pid

@@ -29,7 +29,7 @@ files <- file.path(rawroot, "Chad",
 # survey_id <- "UGA_2018_RHS_V01_M"
 # files <- file.path(rawroot, "Uganda", c("UGA_hh.dta", "UGA_ind.dta"))
 
-# Optional supporting documents (questionnaires, reports) for the Doc/ folder
+# Optional supporting documents (questionnaires, reports) for the Doc/Questionnaires folder
 docs <- character(0)
 
 # ---- upload: first file opens a NEW transaction ------------------------------
@@ -60,7 +60,7 @@ for (f in docs) {
     survey_id      = survey_id,
     type           = "raw",
     infile         = f,
-    folder_name    = "Doc",
+    folder_name    = "Doc/Questionnaires",
     transaction_id = up$transaction_id
   )
 }
