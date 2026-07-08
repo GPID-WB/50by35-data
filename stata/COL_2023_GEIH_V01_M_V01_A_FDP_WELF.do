@@ -1,5 +1,5 @@
 /* =====================================================================
-harmonize_COL_2023_GEIH.do
+COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do
 50by35 pipeline — Step 2: harmonize Colombia GEIH 2023 to the 50by35 schema
 
 Inputs : $REFUGEE_RAW_DATA/Colombia/GEIH/individual_data_2023.dta

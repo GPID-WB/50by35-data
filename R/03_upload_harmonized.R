@@ -36,13 +36,13 @@ process_name <- "FDP-harmonized-data"
 zline        <- 3.00                    # poverty line, $/day 2021 PPP
 
 survey_id   <- "TCD_2022_EHCVM_V01_M_V01_A_FDP"
-harm_script <- "Stata/harmonize_TCD_2022_EHCVM.do"
+harm_script <- "Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do"
 
 # survey_id   <- "COL_2023_GEIH_V01_M_V01_A_FDP"
-# harm_script <- "Stata/harmonize_COL_2023_GEIH.do"
+# harm_script <- "Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do"
 
 # survey_id   <- "UGA_2018_RHS_V01_M_V01_A_FDP"
-# harm_script <- "Stata/harmonize_UGA_2018_RHS.do"
+# harm_script <- "Stata/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do"
 
 dta_file <- file.path(outdir, paste0(survey_id, "_WELF.dta"))
 

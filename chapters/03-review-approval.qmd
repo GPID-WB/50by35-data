@@ -76,7 +76,7 @@ primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
               infile = paste0("data/processed/", survey_id, "_WELF.dta"),
               folder_name = "Data/Stata", transaction_id = up$transaction_id)
 primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
-              infile = "Stata/harmonize_COL_2023_GEIH.do",
+              infile = "Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do",
               folder_name = "Programs", transaction_id = up$transaction_id)
 
 # 5. Confirm the draft transaction once all files are attached
@@ -109,7 +109,7 @@ primus upload, proc(40) surveyid(`surveyid') type(harmonized) ///
     folderpath(Data/Stata) infile("data/processed/`surveyid'_WELF.dta") tranxid(`tranxid')
 
 primus upload, proc(40) surveyid(`surveyid') type(harmonized) ///
-    folderpath(Programs) infile("Stata/harmonize_COL_2023_GEIH.do") tranxid(`tranxid')
+    folderpath(Programs) infile("Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do") tranxid(`tranxid')
 
 * 5. Confirm the draft transaction (uploader step)
 primus action, tranxid(`tranxid') proc(40) ///

@@ -1,5 +1,5 @@
 /* =====================================================================
-harmonize_UGA_2018_RHS.do
+UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do
 50by35 pipeline — Step 2: harmonize Uganda Refugee & Host Communities
 Household Survey 2018 to the 50by35 schema
 

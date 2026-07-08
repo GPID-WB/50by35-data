@@ -28,13 +28,13 @@ local processid 40                       // FDP-harmonized-data
 local zline     3.00                     // poverty line, $/day 2021 PPP
 
 local surveyid  "TCD_2022_EHCVM_V01_M_V01_A_FDP"
-local harmscript "Stata/harmonize_TCD_2022_EHCVM.do"
+local harmscript "Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do"
 
 *local surveyid  "COL_2023_GEIH_V01_M_V01_A_FDP"
-*local harmscript "Stata/harmonize_COL_2023_GEIH.do"
+*local harmscript "Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do"
 
 *local surveyid  "UGA_2018_RHS_V01_M_V01_A_FDP"
-*local harmscript "Stata/harmonize_UGA_2018_RHS.do"
+*local harmscript "Stata/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do"
 
 local dtafile "`outdir'/`surveyid'_WELF.dta"
 

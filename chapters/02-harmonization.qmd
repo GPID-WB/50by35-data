@@ -14,9 +14,9 @@ Example harmonization scripts for three surveys are available in the `Stata/` fo
 
 | Script | Survey | Welfare measure |
 |---|---|---|
-| `Stata/harmonize_TCD_2022_EHCVM.do` | Chad EHCVM 2022 | Consumption (spatially deflated) |
-| `Stata/harmonize_COL_2023_GEIH.do` | Colombia GEIH 2023 | Income (annualized from monthly) |
-| `Stata/harmonize_UGA_2018_RHS.do` | Uganda Refugee & Host Communities HH Survey 2018 | Consumption (annualized from monthly) |
+| `Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do` | Chad EHCVM 2022 | Consumption (spatially deflated) |
+| `Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do` | Colombia GEIH 2023 | Income (annualized from monthly) |
+| `Stata/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do` | Uganda Refugee & Host Communities HH Survey 2018 | Consumption (annualized from monthly) |
 
 The scripts read the raw data from the folder given by the `REFUGEE_RAW_DATA` environment variable and write the harmonized file to `data/processed/` (gitignored — harmonized microdata is never committed to this repository). Common conventions across all three:
 
