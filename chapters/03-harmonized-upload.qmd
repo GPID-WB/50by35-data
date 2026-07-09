@@ -10,20 +10,22 @@ Harmonized microdata and harmonization scripts are uploaded to **datalibweb** vi
 
 Harmonized files are uploaded as a PRIMUS **transaction** using the `FDP-harmonized-data` process (`processid = 40`) by users with uploader status. 
 
+### Validation checks
 All harmonized files must pass validation checks before they can be uploaded to datalibweb. These confirm that the harmonized file conforms to the schema, and that mandatory variables are present and non-missing. Any deviation from the schema will trigger an error and prevent the harmonized file from being uploaded to datalibweb. They check for missing values in mandatory variables, for negative or zero values in `welfare` and `weight`, and that `welfare_self` is not greater than `welfare`. Households where `hhsize` differs from the number of `pid` records are flagged with a warning (rosters can be incomplete, and refugee-only samples keep a subset of household members). The validation scripts are `Stata/validate_50by35.do` and `R/validate_50by35.R` in this repository.
 
-A harmonized data upload starts with an **indicator `.xml`** file that opens the transaction and returns a transaction ID. The XML contains metadata about the harmonized file, the poverty headcount from `welfare`, and the **50by35 self-reliance share** computed from `welfare_self` at the *$3.00/day* 2021 PPP line (to be updated) — the values the reviewer approves. 
+### XML file
+A harmonized data upload starts with an **indicator `.xml`** file that opens the transaction and returns a transaction ID. The XML contains metadata about the harmonized file, the poverty headcount from `welfare`, and the **50by35 self-reliance share** computed from `welfare_self` at the $3.00/day 2021 PPP line (**placeholder** — pending confirmation from the 50by35 methodology team).
 
 The XML's content can be customized, provided it follows the `<PRIMUS_ANALYSIS>` heading format; both upload scripts in this repository write the same compact document.
 
 ### CPI and PPP conversion factors {#sec-cpi-ppp}
 
-The conversion factors come from the [World Bank PIP](https://pip.worldbank.org) auxiliary tables, pinned to the **2021 PPP framework** (R: `pipr::get_aux("cpi", ppp_version = 2021)`; Stata: `pip tables, table(cpi) ppp_year(2021) clear`):
+The conversion factors used to calculate the indicator for the XML file come from the [World Bank PIP](https://pip.worldbank.org) auxiliary tables, pinned to the **2021 PPP framework** (R: `pipr::get_aux("cpi", ppp_version = 2021)`; Stata: `pip tables, table(cpi) ppp_year(2021) clear`):
 
 - **PPP** — the ICP 2021 purchasing-power-parity conversion factor (LCU per 2021 international $), one value per country.
 - **CPI** — PIP's consumer price index, normalized so that CPI $= 1$ in 2021 and aligned to each survey's fieldwork period, one value per country-year.
 
-They enter the self-reliance indicator exactly as in the [formula on the home page](../index.qmd): `welfare_self` (annual per capita LCU at survey-year prices) is divided by 365 to get a daily value, by the survey-year CPI to convert to 2021 prices, and by the PPP factor to convert to 2021 PPP dollars, then compared with $z = \$3.00$.
+They enter the self-reliance indicator exactly as in the [formula on the home page](../index.qmd): `welfare_self` (annual per capita LCU at survey-year prices) is divided by 365 to get a daily value, by the survey-year CPI to convert to 2021 prices, and by the PPP factor to convert to 2021 PPP dollars, then compared with $z = \$3.00$ (**placeholder** value, pending confirmation from the 50by35 methodology team).
 
 ::: {.callout-warning}
 ## Surveys not in PIP
@@ -74,7 +76,9 @@ df$icp2021 <- ppp$value[ppp$country_code == df$countrycode[1] &
 
 # 3. Compute the self-reliance share and write the indicator XML —
 #    see R/03_upload_harmonized.R for the XML writer (PRIMUS accepts a
-#    team-defined XML that follows the <PRIMUS_ANALYSIS> heading format)
+#    team-defined XML that follows the <PRIMUS_ANALYSIS> heading format).
+#    3.00 is a placeholder PPP line, pending confirmation from the
+#    50by35 methodology team.
 sr <- weighted.mean(df$welfare_self/365/df$cpi2021/df$icp2021 >= 3.00, df$weight)
 
 # 4. The XML opens the transaction; then attach the data and programs
@@ -104,7 +108,8 @@ do "Stata/validate_50by35.do"
 *    the lookup; pip tables, table(cpi) / table(ppp))
 
 * 3. Build the indicator XML — see Stata/03_upload_harmonized.do, which
-*    computes the self-reliance share at $3.00/day 2021 PPP and writes
+*    computes the self-reliance share at $3.00/day 2021 PPP (placeholder,
+*    pending confirmation from the 50by35 methodology team) and writes
 *    the <PRIMUS_ANALYSIS> document
 
 * 4. The XML opens the transaction (xmlbl flag); the transaction ID is

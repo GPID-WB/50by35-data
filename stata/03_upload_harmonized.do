@@ -25,7 +25,8 @@ if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- parameters: uncomment ONE survey block ------------------------------
 local processid 40                       // FDP-harmonized-data
-local zline     3.00                     // poverty line, $/day 2021 PPP
+local zline     3.00                     // placeholder poverty line, $/day 2021 PPP —
+                                          // pending confirmation from the 50by35 methodology team
 
 local surveyid  "TCD_2022_EHCVM_V01_M_V01_A_FDP"
 local harmscript "Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do"

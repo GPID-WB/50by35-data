@@ -26,7 +26,23 @@ The scripts read the raw data from the folder given by the `REFUGEE_RAW_DATA` en
 
 After harmonizing, check the file against the schema before upload:
 
+::: {.panel-tabset}
+
+## R
+
+```r
+library(haven)
+source("R/validate_50by35.R")
+
+df <- read_dta("data/processed/<SurveyID>_WELF.dta")
+validate_50by35(df)
+```
+
+## Stata
+
 ```stata
 use "data/processed/<SurveyID>_WELF.dta", clear
 do "Stata/validate_50by35.do"
 ```
+
+:::
