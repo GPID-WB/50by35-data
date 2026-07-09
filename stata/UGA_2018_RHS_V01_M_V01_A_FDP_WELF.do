@@ -5,6 +5,7 @@ Household Survey 2018 to the 50by35 schema
 
 Inputs : $REFUGEE_RAW_DATA/Uganda/UGA_hh.dta
          $REFUGEE_RAW_DATA/Uganda/UGA_ind.dta
+         (or datalibweb's FDPRAW collection — set the `rawsource' local below)
 Output : ${FIFTYBY35_PROCESSED:-data/processed}/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.dta
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
@@ -18,9 +19,17 @@ version 18
 clear
 set more off
 
+do "Stata/utils.do"
+
+* ---- raw data source: "local" (default) or "datalibweb" ------------------
+* "local" reads from REFUGEE_RAW_DATA as before; "datalibweb" fetches the
+* same files from the FDPRAW collection instead (see chapters/04-access.qmd,
+* requires the datalibweb Stata package + a registered token).
+local rawsource "local"
+
 * ---- paths from environment --------------------------------------------
 local rawroot : env REFUGEE_RAW_DATA
-if `"`rawroot'"' == "" {
+if "`rawsource'" == "local" & `"`rawroot'"' == "" {
     di as error "Set REFUGEE_RAW_DATA to the raw-data root folder"
     exit 601
 }
@@ -28,7 +37,9 @@ local outdir : env FIFTYBY35_PROCESSED
 if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- household level ----------------------------------------------------
-use "`rawroot'/Uganda/UGA_hh.dta", clear
+get_raw_data, source(`rawsource') localpath(`"`rawroot'/Uganda/UGA_hh.dta"') ///
+    country(UGA) years(2018) surveyid(UGA_2018_RHS_V01_M) ///
+    filename(UGA_hh.dta)
 drop region child   // clash with individual-level names downstream
 
 * welfare: monthly nominal HH consumption (cons_agg), annualized,
@@ -44,7 +55,10 @@ replace    welfare_self = welfare if welfare_self > welfare & !missing(welfare)
 recode urban (1=0) (0=1)
 
 * ---- merge individuals ---------------------------------------------------
-merge 1:m hh using "`rawroot'/Uganda/UGA_ind.dta", keep(3) nogen ///
+get_raw_data_path, source(`rawsource') localpath(`"`rawroot'/Uganda/UGA_ind.dta"') ///
+    country(UGA) years(2018) surveyid(UGA_2018_RHS_V01_M) ///
+    filename(UGA_ind.dta)
+merge 1:m hh using "`r(path)'", keep(3) nogen ///
     keepusing(pid age gender high_edu_lev_18p emp_stat country_3digit survey_year)
 
 * refugees only
@@ -58,6 +72,7 @@ drop if missing(welfare)
 * ---- schema variables ----------------------------------------------------
 gen str3 code = country_3digit
 gen int  year        = survey_year
+gen      survname    = "RHS"
 
 rename hh hhid                        // str32
 tostring pid, replace force
@@ -100,6 +115,7 @@ foreach v in welfare_type male urban camp educat4 empstat {
 
 label variable code  "Country code"
 label variable year         "Survey year"
+label variable survname     "Survey name"
 label variable hhid         "Household identifier"
 label variable pid          "Person identifier"
 label variable welfare      "Welfare aggregate (LCU, annual per capita)"
@@ -114,9 +130,9 @@ label variable male         "Sex"
 label variable educat4      "Highest education (4 cat.)"
 label variable empstat      "Employment status"
 
-keep  code year hhid pid welfare welfare_type welfare_self weight ///
+keep  code year survname hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
-order code year hhid pid welfare welfare_type welfare_self weight ///
+order code year survname hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
 
 isid hhid pid

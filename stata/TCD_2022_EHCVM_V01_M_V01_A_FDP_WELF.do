@@ -4,6 +4,7 @@ TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do
 
 Inputs : $REFUGEE_RAW_DATA/Chad/household_TCD_2022.dta
          $REFUGEE_RAW_DATA/Chad/individual_TCD_2022.dta
+         (or datalibweb's FDPRAW collection — set the `rawsource' local below)
 Output : ${FIFTYBY35_PROCESSED:-data/processed}/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.dta
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
@@ -16,9 +17,17 @@ version 18
 clear
 set more off
 
+do "Stata/utils.do"
+
+* ---- raw data source: "local" (default) or "datalibweb" ------------------
+* "local" reads from REFUGEE_RAW_DATA as before; "datalibweb" fetches the
+* same files from the FDPRAW collection instead (see chapters/04-access.qmd,
+* requires the datalibweb Stata package + a registered token).
+local rawsource "local"
+
 * ---- paths from environment --------------------------------------------
 local rawroot : env REFUGEE_RAW_DATA
-if `"`rawroot'"' == "" {
+if "`rawsource'" == "local" & `"`rawroot'"' == "" {
     di as error "Set REFUGEE_RAW_DATA to the raw-data root folder"
     exit 601
 }
@@ -26,7 +35,9 @@ local outdir : env FIFTYBY35_PROCESSED
 if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- household level ----------------------------------------------------
-use "`rawroot'/Chad/household_TCD_2022.dta", clear
+get_raw_data, source(`rawsource') localpath(`"`rawroot'/Chad/household_TCD_2022.dta"') ///
+    country(TCD) years(2022) surveyid(TCD_2022_EHCVM_V01_M) ///
+    filename(household_TCD_2022.dta)
 
 * welfare: HH nominal annual consumption (dtot), spatially deflated,
 * per capita, in LCU (XAF). welfare_type = 1 (consumption).
@@ -37,7 +48,10 @@ gen double welfare = (dtot/def_spa)/hhsize
 gen double welfare_self = (max(dtot - income_aid, 0)/def_spa)/hhsize
 
 * ---- merge individuals ---------------------------------------------------
-merge 1:m grappe menage using "`rawroot'/Chad/individual_TCD_2022.dta"
+get_raw_data_path, source(`rawsource') localpath(`"`rawroot'/Chad/individual_TCD_2022.dta"') ///
+    country(TCD) years(2022) surveyid(TCD_2022_EHCVM_V01_M) ///
+    filename(individual_TCD_2022.dta)
+merge 1:m grappe menage using "`r(path)'"
 keep if _merge==3
 drop _merge
 
@@ -47,6 +61,7 @@ keep if inlist(pop_group, 1, 2, 6)
 * ---- schema variables ----------------------------------------------------
 gen str3 code = "TCD"
 gen int  year        = surveyyear
+gen      survname    = "EHCVM"
 
 * identifiers: rebuild hhid from grappe/menage (raw hhid is numeric float)
 drop hhid
@@ -92,6 +107,7 @@ foreach v in welfare_type male urban camp educat4 empstat {
 
 label variable code  "Country code"
 label variable year         "Survey year"
+label variable survname     "Survey name"
 label variable hhid         "Household identifier"
 label variable pid          "Person identifier"
 label variable welfare      "Welfare aggregate (LCU, annual per capita)"
@@ -107,9 +123,9 @@ label variable educat4      "Highest education (4 cat.)"
 label variable empstat      "Employment status"
 label variable psu          "Primary sampling unit"
 
-keep  code year hhid pid welfare welfare_type welfare_self weight ///
+keep  code year survname hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat psu
-order code year hhid pid welfare welfare_type welfare_self weight ///
+order code year survname hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat psu
 
 isid hhid pid

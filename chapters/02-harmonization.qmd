@@ -17,7 +17,7 @@ Example harmonization scripts for three surveys are available in the `Stata/` fo
 | `Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do` | Colombia GEIH 2023 | Income (annualized from monthly) |
 | `Stata/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do` | Uganda Refugee & Host Communities HH Survey 2018 | Consumption (annualized from monthly) |
 
-The scripts read the raw data from the folder given by the `REFUGEE_RAW_DATA` environment variable and write the harmonized file to `data/processed/` (not committed to this repository). Common conventions across all three:
+Each script sets a local `rawsource` macro near the top ("local" by default) that controls where the raw input files come from: `local` reads from the folder given by the `REFUGEE_RAW_DATA` environment variable, while `datalibweb` fetches the same files directly from the `FDPRAW` collection (see [Access Data](04-access.qmd)) using helpers in `Stata/utils.do`. Either way, the harmonized file is written to `data/processed/` (not committed to this repository). Common conventions across all three:
 
 - **Sample**: refugees only — the 50by35 monitoring population.
 - **`welfare`**: the survey's official welfare aggregate, converted to **annual per capita LCU**.

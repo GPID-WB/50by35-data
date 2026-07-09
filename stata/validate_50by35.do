@@ -9,7 +9,7 @@ Usage:  use "<harmonized file>.dta", clear
 ===================================================================== */
 
 * ---- mandatory variables present -----------------------------------------
-foreach v in code year hhid pid welfare welfare_type welfare_self ///
+foreach v in code year survname hhid pid welfare welfare_type welfare_self ///
              weight camp urban {
     capture confirm variable `v'
     if _rc {
@@ -19,9 +19,9 @@ foreach v in code year hhid pid welfare welfare_type welfare_self ///
 }
 
 * ---- identifier types and uniqueness --------------------------------------
-capture confirm string variable code hhid pid
+capture confirm string variable code survname hhid pid
 if _rc {
-    di as error "SCHEMA ERROR: code, hhid and pid must be strings"
+    di as error "SCHEMA ERROR: code, survname, hhid and pid must be strings"
     exit 459
 }
 capture assert strlen(code)==3
@@ -46,6 +46,11 @@ foreach v in year welfare welfare_type welfare_self weight {
 capture assert hhid != "" & pid != ""
 if _rc {
     di as error "SCHEMA ERROR: empty hhid or pid"
+    exit 459
+}
+capture assert survname != ""
+if _rc {
+    di as error "SCHEMA ERROR: empty survname"
     exit 459
 }
 

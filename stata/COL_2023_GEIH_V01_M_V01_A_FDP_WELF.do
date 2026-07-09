@@ -4,6 +4,7 @@ COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do
 
 Inputs : $REFUGEE_RAW_DATA/Colombia/GEIH/individual_data_2023.dta
          $REFUGEE_RAW_DATA/Colombia/GEIH/household_data_2023.dta
+         (or datalibweb's FDPRAW collection — set the `rawsource' local below)
 Output : ${FIFTYBY35_PROCESSED:-data/processed}/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
@@ -18,9 +19,17 @@ version 18
 clear
 set more off
 
+do "Stata/utils.do"
+
+* ---- raw data source: "local" (default) or "datalibweb" ------------------
+* "local" reads from REFUGEE_RAW_DATA as before; "datalibweb" fetches the
+* same files from the FDPRAW collection instead (see chapters/04-access.qmd,
+* requires the datalibweb Stata package + a registered token).
+local rawsource "local"
+
 * ---- paths from environment --------------------------------------------
 local rawroot : env REFUGEE_RAW_DATA
-if `"`rawroot'"' == "" {
+if "`rawsource'" == "local" & `"`rawroot'"' == "" {
     di as error "Set REFUGEE_RAW_DATA to the raw-data root folder"
     exit 601
 }
@@ -28,8 +37,13 @@ local outdir : env FIFTYBY35_PROCESSED
 if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- merge individual and household data ---------------------------------
-use "`rawroot'/Colombia/GEIH/individual_data_2023.dta", clear
-merge m:1 hhid using "`rawroot'/Colombia/GEIH/household_data_2023.dta", keep(3) nogen
+get_raw_data, source(`rawsource') localpath(`"`rawroot'/Colombia/GEIH/individual_data_2023.dta"') ///
+    country(COL) years(2023) surveyid(COL_2023_GEIH_V01_M) ///
+    filename(individual_data_2023.dta)
+get_raw_data_path, source(`rawsource') localpath(`"`rawroot'/Colombia/GEIH/household_data_2023.dta"') ///
+    country(COL) years(2023) surveyid(COL_2023_GEIH_V01_M) ///
+    filename(household_data_2023.dta)
+merge m:1 hhid using "`r(path)'", keep(3) nogen
 
 * refugees only: Venezuelan migrants, excluding the Colombia-born
 replace refugee = 0 if cbirth==170
@@ -38,6 +52,7 @@ keep if refugee==1
 * ---- schema variables ----------------------------------------------------
 gen str3 code = "COL"
 gen int  year        = survey_year
+gen      survname    = "GEIH"
 
 * welfare: official GEIH income aggregate ingpcug (monthly per capita of
 * the expenditure unit, denominator npersug), annualized to LCU (COP).
@@ -97,6 +112,7 @@ foreach v in welfare_type male urban camp educat4 empstat {
 
 label variable code  "Country code"
 label variable year         "Survey year"
+label variable survname     "Survey name"
 label variable hhid         "Household identifier"
 label variable pid          "Person identifier"
 label variable welfare      "Welfare aggregate (LCU, annual per capita)"
@@ -111,9 +127,9 @@ label variable male         "Sex"
 label variable educat4      "Highest education (4 cat.)"
 label variable empstat      "Employment status"
 
-keep  code year hhid pid welfare welfare_type welfare_self weight ///
+keep  code year survname hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
-order code year hhid pid welfare welfare_type welfare_self weight ///
+order code year survname hhid pid welfare welfare_type welfare_self weight ///
       camp urban hhsize age male educat4 empstat
 
 isid hhid pid
