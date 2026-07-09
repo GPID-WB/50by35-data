@@ -93,33 +93,99 @@ sr_share <- weighted.mean(df$welfare_self / 365 / cpi_value / icp_value >= zline
                           df$weight)
 headcount <- weighted.mean(df$welfare / 365 / cpi_value / icp_value < zline,
                            df$weight)
-mean_lcu <- weighted.mean(df$welfare, df$weight)
+mean_lcu      <- weighted.mean(df$welfare, df$weight)
+mean_lcu_self <- weighted.mean(df$welfare_self, df$weight)
 message(sprintf("Self-reliance share (z=$%.2f/day 2021 PPP): %.4f", zline, sr_share))
 
-# ---- write the indicator XML (same structure as the Stata client) ---------------
+# ---- write the indicator XML (PRIMUS XML schema for harmonized data) -----------
+# Sections: Request (RequestKey, welfare, weight, By, N_By_Group, nParamSets,
+# plus a key;value CDATA block of run metadata), Result (one <Welfare> per
+# welfare variable, containing one <ByGroup> per N_By_Group with a
+# <DATASUMMARY> and one <CALCULATION> per nParamSets, each a key;value CDATA
+# block), and LOG_DETAIL (free-text CDATA, not shown in the approval table).
+kv <- function(...) {
+  vals <- c(...)
+  paste(names(vals), vals, sep = ";")
+}
+cdata_block <- function(lines) c("<![CDATA[", "key;value", lines, "]]>")
+
+request_cdata <- cdata_block(kv(
+  APP_ID       = "R",
+  DATETIME     = format(Sys.time(), "%d %b %Y %H:%M:%S"),
+  COUNTRY_CODE = ccode,
+  FILENAME     = basename(dta_file),
+  DATA_YEAR    = year,
+  REF_YEAR     = year,
+  PPP_YEAR     = "2021"
+))
+
+datasummary_cdata <- cdata_block(kv(
+  nRecs                 = nrow(df),
+  Mean_LCU_welfare      = sprintf("%.2f", mean_lcu),
+  Mean_LCU_welfare_self = sprintf("%.2f", mean_lcu_self)
+))
+
+calc_headcount_cdata <- cdata_block(kv(
+  Indicator   = "PovertyHeadcount",
+  Variable    = "welfare",
+  PovertyLine = sprintf("%.2f", zline),
+  Method      = "EmbeddedCPI",
+  CPIValue    = sprintf("%.6f", cpi_value),
+  PPPValue    = sprintf("%.6f", icp_value),
+  Value       = sprintf("%.6f", headcount)
+))
+
+calc_selfreliance_cdata <- cdata_block(kv(
+  Indicator   = "SelfRelianceShare",
+  Variable    = "welfare_self",
+  PovertyLine = sprintf("%.2f", zline),
+  Method      = "EmbeddedCPI",
+  CPIValue    = sprintf("%.6f", cpi_value),
+  PPPValue    = sprintf("%.6f", icp_value),
+  Value       = sprintf("%.6f", sr_share)
+))
+
+log_detail_cdata <- c(
+  "<![CDATA[",
+  sprintf("50by35 self-reliance indicator for %s.", survey_id),
+  sprintf(paste0("welfare_self / 365 / CPI(%s,%s)=%.6f / PPP2021(%s)=%.6f >= z=%.2f",
+                 " (placeholder, pending confirmation from the 50by35 methodology team)."),
+          ccode, year, cpi_value, ccode, icp_value, zline),
+  sprintf("PovertyHeadcount (welfare, same z): %.6f", headcount),
+  sprintf("SelfRelianceShare (welfare_self): %.6f", sr_share),
+  "]]>"
+)
+
 xml_file <- file.path(outdir, paste0(survey_id, ".xml"))
 writeLines(c(
   "<PRIMUS_ANALYSIS>",
   "  <Request>",
-  "    <welfare>welfare,welfare_self</welfare>",
+  "    <RequestKey><![CDATA[]]></RequestKey>",
+  "    <welfare>welfare_self</welfare>",
   "    <weight>weight</weight>",
-  "    <![CDATA[APP_ID=R",
-  format(Sys.time(), "DATETIME=%d %b %Y %H:%M:%S"),
-  paste0("COUNTRY_CODE=", ccode),
-  paste0("FILENAME=", basename(dta_file)),
-  paste0("DATA_YEAR=", year),
-  paste0("REF_YEAR=", year),
-  "PPP_YEAR=2021]]>",
+  "    <By></By>",
+  "    <N_By_Group>1</N_By_Group>",
+  "    <nParamSets>2</nParamSets>",
+  paste0("    ", request_cdata),
   "  </Request>",
   "  <Result>",
-  '    <ByGroup byCondition="none">',
-  sprintf('      <DATASUMMARY nRecs="%d" Mean_LCU="%.2f" />', nrow(df), mean_lcu),
-  sprintf(paste0('      <CALCULATION povertyLine="%.2f" method="EmbeddedCPI"',
-                 ' CPIValue="%s" PPPValue="%s" Headcount="%.6f"',
-                 ' SelfReliantShare="%.6f" />'),
-          zline, cpi_value, icp_value, headcount, sr_share),
-  "    </ByGroup>",
+  '    <Welfare var="welfare_self" weight="weight">',
+  '      <ByGroup byCondition="none">',
+  "        <DATASUMMARY>",
+  paste0("          ", datasummary_cdata),
+  "        </DATASUMMARY>",
+  "        <CALCULATION>",
+  paste0("          ", calc_headcount_cdata),
+  "        </CALCULATION>",
+  "        <CALCULATION>",
+  paste0("          ", calc_selfreliance_cdata),
+  "        </CALCULATION>",
+  "      </ByGroup>",
+  "    </Welfare>",
   "  </Result>",
+  "  <LOG_DETAIL>",
+  paste0("    ", log_detail_cdata),
+  "  </LOG_DETAIL>",
   "</PRIMUS_ANALYSIS>"
 ), xml_file)
 message("Wrote ", xml_file)

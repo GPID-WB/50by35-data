@@ -104,33 +104,88 @@ qui sum _poor [aw=weight]
 local hc : di %9.6f r(mean)
 qui sum welfare [aw=weight]
 local meanlcu : di %14.2f r(mean)
+qui sum welfare_self [aw=weight]
+local meanlcuself : di %14.2f r(mean)
 local nrecs = _N
 drop _sr _poor
 
 di as result "Self-reliance share (z=$`zline'/day 2021 PPP): `sr'"
 
-* ---- write the indicator XML ------------------------------------------------
+* ---- write the indicator XML (PRIMUS XML schema for harmonized data) -------
+* Sections: Request (RequestKey, welfare, weight, By, N_By_Group, nParamSets,
+* plus a key;value CDATA block of run metadata), Result (one <Welfare> per
+* welfare variable, containing one <ByGroup> per N_By_Group with a
+* <DATASUMMARY> and one <CALCULATION> per nParamSets, each a key;value CDATA
+* block), and LOG_DETAIL (free-text CDATA, not shown in the approval table).
 local xmlfile "`outdir'/`surveyid'.xml"
 tempname fh
 file open `fh' using "`xmlfile'", write replace
+
 file write `fh' `"<PRIMUS_ANALYSIS>"' _n
 file write `fh' `"  <Request>"' _n
-file write `fh' `"    <welfare>welfare,welfare_self</welfare>"' _n
+file write `fh' `"    <RequestKey><![CDATA[]]></RequestKey>"' _n
+file write `fh' `"    <welfare>welfare_self</welfare>"' _n
 file write `fh' `"    <weight>weight</weight>"' _n
-file write `fh' `"    <![CDATA[APP_ID=Stata"' _n
-file write `fh' `"DATETIME=`c(current_date)' `c(current_time)'"' _n
-file write `fh' `"COUNTRY_CODE=`ccode'"' _n
-file write `fh' `"FILENAME=`surveyid'_WELF.dta"' _n
-file write `fh' `"DATA_YEAR=`year'"' _n
-file write `fh' `"REF_YEAR=`year'"' _n
-file write `fh' `"PPP_YEAR=2021]]>"' _n
+file write `fh' `"    <By></By>"' _n
+file write `fh' `"    <N_By_Group>1</N_By_Group>"' _n
+file write `fh' `"    <nParamSets>2</nParamSets>"' _n
+file write `fh' `"    <![CDATA["' _n
+file write `fh' `"key;value"' _n
+file write `fh' `"APP_ID;Stata"' _n
+file write `fh' `"DATETIME;`c(current_date)' `c(current_time)'"' _n
+file write `fh' `"COUNTRY_CODE;`ccode'"' _n
+file write `fh' `"FILENAME;`surveyid'_WELF.dta"' _n
+file write `fh' `"DATA_YEAR;`year'"' _n
+file write `fh' `"REF_YEAR;`year'"' _n
+file write `fh' `"PPP_YEAR;2021"' _n
+file write `fh' `"    ]]>"' _n
 file write `fh' `"  </Request>"' _n
 file write `fh' `"  <Result>"' _n
-file write `fh' `"    <ByGroup byCondition="none">"' _n
-file write `fh' `"      <DATASUMMARY nRecs="`nrecs'" Mean_LCU="`=trim("`meanlcu'")'" />"' _n
-file write `fh' `"      <CALCULATION povertyLine="`zline'" method="EmbeddedCPI" CPIValue="`cpival'" PPPValue="`pppval'" Headcount="`=trim("`hc'")'" SelfReliantShare="`=trim("`sr'")'" />"' _n
-file write `fh' `"    </ByGroup>"' _n
+file write `fh' `"    <Welfare var="welfare_self" weight="weight">"' _n
+file write `fh' `"      <ByGroup byCondition="none">"' _n
+file write `fh' `"        <DATASUMMARY>"' _n
+file write `fh' `"          <![CDATA["' _n
+file write `fh' `"key;value"' _n
+file write `fh' `"nRecs;`nrecs'"' _n
+file write `fh' `"Mean_LCU_welfare;`=trim("`meanlcu'")'"' _n
+file write `fh' `"Mean_LCU_welfare_self;`=trim("`meanlcuself'")'"' _n
+file write `fh' `"          ]]>"' _n
+file write `fh' `"        </DATASUMMARY>"' _n
+file write `fh' `"        <CALCULATION>"' _n
+file write `fh' `"          <![CDATA["' _n
+file write `fh' `"key;value"' _n
+file write `fh' `"Indicator;PovertyHeadcount"' _n
+file write `fh' `"Variable;welfare"' _n
+file write `fh' `"PovertyLine;`zline'"' _n
+file write `fh' `"Method;EmbeddedCPI"' _n
+file write `fh' `"CPIValue;`cpival'"' _n
+file write `fh' `"PPPValue;`pppval'"' _n
+file write `fh' `"Value;`=trim("`hc'")'"' _n
+file write `fh' `"          ]]>"' _n
+file write `fh' `"        </CALCULATION>"' _n
+file write `fh' `"        <CALCULATION>"' _n
+file write `fh' `"          <![CDATA["' _n
+file write `fh' `"key;value"' _n
+file write `fh' `"Indicator;SelfRelianceShare"' _n
+file write `fh' `"Variable;welfare_self"' _n
+file write `fh' `"PovertyLine;`zline'"' _n
+file write `fh' `"Method;EmbeddedCPI"' _n
+file write `fh' `"CPIValue;`cpival'"' _n
+file write `fh' `"PPPValue;`pppval'"' _n
+file write `fh' `"Value;`=trim("`sr'")'"' _n
+file write `fh' `"          ]]>"' _n
+file write `fh' `"        </CALCULATION>"' _n
+file write `fh' `"      </ByGroup>"' _n
+file write `fh' `"    </Welfare>"' _n
 file write `fh' `"  </Result>"' _n
+file write `fh' `"  <LOG_DETAIL>"' _n
+file write `fh' `"    <![CDATA["' _n
+file write `fh' `"50by35 self-reliance indicator for `surveyid'."' _n
+file write `fh' `"welfare_self / 365 / CPI(`ccode',`year')=`cpival' / PPP2021(`ccode')=`pppval' >= z=`zline' (placeholder, pending confirmation from the 50by35 methodology team)."' _n
+file write `fh' `"PovertyHeadcount (welfare, same z): `=trim("`hc'")'"' _n
+file write `fh' `"SelfRelianceShare (welfare_self): `=trim("`sr'")'"' _n
+file write `fh' `"    ]]>"' _n
+file write `fh' `"  </LOG_DETAIL>"' _n
 file write `fh' `"</PRIMUS_ANALYSIS>"' _n
 file close `fh'
 di as result "Wrote `xmlfile'"
