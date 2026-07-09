@@ -36,11 +36,11 @@ process_name <- "FDP-harmonized-data"
 zline        <- 3.00                    # placeholder poverty line, $/day 2021 PPP —
                                          # pending confirmation from the 50by35 methodology team
 
-survey_id   <- "TCD_2022_EHCVM_V01_M_V01_A_FDP"
-harm_script <- "Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do"
+# survey_id   <- "TCD_2022_EHCVM_V01_M_V01_A_FDP"
+# harm_script <- "Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do"
 
-# survey_id   <- "COL_2023_GEIH_V01_M_V01_A_FDP"
-# harm_script <- "Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do"
+survey_id   <- "COL_2023_GEIH_V01_M_V01_A_FDP"
+harm_script <- "Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do"
 
 # survey_id   <- "UGA_2018_RHS_V01_M_V01_A_FDP"
 # harm_script <- "Stata/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do"

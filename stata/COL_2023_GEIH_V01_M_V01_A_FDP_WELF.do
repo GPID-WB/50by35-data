@@ -4,7 +4,7 @@ COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do
 
 Inputs : $REFUGEE_RAW_DATA/Colombia/GEIH/individual_data_2023.dta
          $REFUGEE_RAW_DATA/Colombia/GEIH/household_data_2023.dta
-         (or datalibweb's FDPRAW collection — set the `rawsource' local below)
+         (or datalibweb's FDPRAW collection — see chapters/04-access.qmd)
 Output : ${FIFTYBY35_PROCESSED:-data/processed}/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
@@ -19,17 +19,13 @@ version 18
 clear
 set more off
 
-do "Stata/utils.do"
-
-* ---- raw data source: "local" (default) or "datalibweb" ------------------
-* "local" reads from REFUGEE_RAW_DATA as before; "datalibweb" fetches the
-* same files from the FDPRAW collection instead (see chapters/04-access.qmd,
-* requires the datalibweb Stata package + a registered token).
-local rawsource "local"
-
-* ---- paths from environment --------------------------------------------
+* ---- raw data source ------------------------------------------------------
+* Reads from REFUGEE_RAW_DATA. The same files can also be fetched from
+* datalibweb's FDPRAW collection instead (see chapters/04-access.qmd,
+* requires the datalibweb Stata package + a registered token) — swap the
+* `use`/`merge...using` lines below for a datalibweb call if needed.
 local rawroot : env REFUGEE_RAW_DATA
-if "`rawsource'" == "local" & `"`rawroot'"' == "" {
+if `"`rawroot'"' == "" {
     di as error "Set REFUGEE_RAW_DATA to the raw-data root folder"
     exit 601
 }
@@ -37,13 +33,8 @@ local outdir : env FIFTYBY35_PROCESSED
 if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- merge individual and household data ---------------------------------
-get_raw_data, source(`rawsource') localpath(`"`rawroot'/Colombia/GEIH/individual_data_2023.dta"') ///
-    country(COL) years(2023) surveyid(COL_2023_GEIH_V01_M) ///
-    filename(individual_data_2023.dta)
-get_raw_data_path, source(`rawsource') localpath(`"`rawroot'/Colombia/GEIH/household_data_2023.dta"') ///
-    country(COL) years(2023) surveyid(COL_2023_GEIH_V01_M) ///
-    filename(household_data_2023.dta)
-merge m:1 hhid using "`r(path)'", keep(3) nogen
+use `"`rawroot'/Colombia/GEIH/individual_data_2023.dta"', clear
+merge m:1 hhid using `"`rawroot'/Colombia/GEIH/household_data_2023.dta"', keep(3) nogen
 
 * refugees only: Venezuelan migrants, excluding the Colombia-born
 replace refugee = 0 if cbirth==170

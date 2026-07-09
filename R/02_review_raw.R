@@ -20,13 +20,15 @@ print(pending)
 if (transaction_id == "")
   stop("Set transaction_id to a transaction from the list above, then rerun")
 
+transaction_id <- "0039-000587256-FDPRAW-COL-23596"
+
 # ---- inspect the files before deciding ----------------------------------------
-primus_transaction_details(transaction_id)
-files <- primus_download_data(transaction_id,
-                              dest_dir = file.path(tempdir(), transaction_id))
-print(files)
+primus_transaction_files(transaction_id)
+
+# ---- download files ----------------------------------------------------------
+
 
 # ---- decision: run ONE ---------------------------------------------------------
-primus_approve(transaction_id, comments = "raw data approved for harmonization")
+primus_approve(transaction_id, comments = "test raw data approved for harmonization")
 
 # primus_reject(transaction_id, comments = "<explain what must be fixed>")

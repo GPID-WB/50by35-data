@@ -5,7 +5,7 @@ Household Survey 2018 to the 50by35 schema
 
 Inputs : $REFUGEE_RAW_DATA/Uganda/UGA_hh.dta
          $REFUGEE_RAW_DATA/Uganda/UGA_ind.dta
-         (or datalibweb's FDPRAW collection — set the `rawsource' local below)
+         (or datalibweb's FDPRAW collection — see chapters/04-access.qmd)
 Output : ${FIFTYBY35_PROCESSED:-data/processed}/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.dta
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
@@ -19,17 +19,13 @@ version 18
 clear
 set more off
 
-do "Stata/utils.do"
-
-* ---- raw data source: "local" (default) or "datalibweb" ------------------
-* "local" reads from REFUGEE_RAW_DATA as before; "datalibweb" fetches the
-* same files from the FDPRAW collection instead (see chapters/04-access.qmd,
-* requires the datalibweb Stata package + a registered token).
-local rawsource "local"
-
-* ---- paths from environment --------------------------------------------
+* ---- raw data source ------------------------------------------------------
+* Reads from REFUGEE_RAW_DATA. The same files can also be fetched from
+* datalibweb's FDPRAW collection instead (see chapters/04-access.qmd,
+* requires the datalibweb Stata package + a registered token) — swap the
+* `use`/`merge...using` lines below for a datalibweb call if needed.
 local rawroot : env REFUGEE_RAW_DATA
-if "`rawsource'" == "local" & `"`rawroot'"' == "" {
+if `"`rawroot'"' == "" {
     di as error "Set REFUGEE_RAW_DATA to the raw-data root folder"
     exit 601
 }
@@ -37,9 +33,7 @@ local outdir : env FIFTYBY35_PROCESSED
 if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- household level ----------------------------------------------------
-get_raw_data, source(`rawsource') localpath(`"`rawroot'/Uganda/UGA_hh.dta"') ///
-    country(UGA) years(2018) surveyid(UGA_2018_RHS_V01_M) ///
-    filename(UGA_hh.dta)
+use `"`rawroot'/Uganda/UGA_hh.dta"', clear
 drop region child   // clash with individual-level names downstream
 
 * welfare: monthly nominal HH consumption (cons_agg), annualized,
@@ -55,10 +49,7 @@ replace    welfare_self = welfare if welfare_self > welfare & !missing(welfare)
 recode urban (1=0) (0=1)
 
 * ---- merge individuals ---------------------------------------------------
-get_raw_data_path, source(`rawsource') localpath(`"`rawroot'/Uganda/UGA_ind.dta"') ///
-    country(UGA) years(2018) surveyid(UGA_2018_RHS_V01_M) ///
-    filename(UGA_ind.dta)
-merge 1:m hh using "`r(path)'", keep(3) nogen ///
+merge 1:m hh using `"`rawroot'/Uganda/UGA_ind.dta"', keep(3) nogen ///
     keepusing(pid age gender high_edu_lev_18p emp_stat country_3digit survey_year)
 
 * refugees only

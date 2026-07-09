@@ -13,7 +13,7 @@ library(primus)
 
 # ---- parameters --------------------------------------------------------------
 process_name   <- "FDP-harmonized-data"
-transaction_id <- ""                    # e.g. "040-000327173-..."
+transaction_id <- "0040-000587256-FDP-COL-2FAD1"                    # e.g. "040-000327173-..."
 
 # ---- what is waiting for review? ----------------------------------------------
 pending <- primus_query_transactions(process_name, status = "pending")
@@ -24,16 +24,17 @@ if (transaction_id == "")
 
 # ---- inspect before deciding ----------------------------------------------------
 primus_transaction_details(transaction_id)
-files <- primus_download_data(transaction_id,
-                              dest_dir = file.path(tempdir(), transaction_id))
-print(files)
 
-# the indicator XML (check the reported self-reliance values)
+primus_transaction_files(transaction_id)
+
+# ---- download files ----------------------------------------------------------
+
+# get the indicator XML (check the reported self-reliance values)
 primus_get_xml(transaction_id,
                out = file.path(tempdir(), paste0(transaction_id, ".xml")))
-
-# ---- decision: run ONE -----------------------------------------------------------
+  
+# ---- decision: run ONE ---------------------------------------------------------
 primus_approve(transaction_id,
-               comments = "harmonized data approved for publication")
+               comments = "test harmonized data approved for publication")
 
 # primus_reject(transaction_id, comments = "<explain what must be fixed>")

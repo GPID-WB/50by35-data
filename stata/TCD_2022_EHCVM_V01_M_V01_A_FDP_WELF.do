@@ -4,7 +4,7 @@ TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do
 
 Inputs : $REFUGEE_RAW_DATA/Chad/household_TCD_2022.dta
          $REFUGEE_RAW_DATA/Chad/individual_TCD_2022.dta
-         (or datalibweb's FDPRAW collection — set the `rawsource' local below)
+         (or datalibweb's FDPRAW collection — see chapters/04-access.qmd)
 Output : ${FIFTYBY35_PROCESSED:-data/processed}/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.dta
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
@@ -17,17 +17,13 @@ version 18
 clear
 set more off
 
-do "Stata/utils.do"
-
-* ---- raw data source: "local" (default) or "datalibweb" ------------------
-* "local" reads from REFUGEE_RAW_DATA as before; "datalibweb" fetches the
-* same files from the FDPRAW collection instead (see chapters/04-access.qmd,
-* requires the datalibweb Stata package + a registered token).
-local rawsource "local"
-
-* ---- paths from environment --------------------------------------------
+* ---- raw data source ------------------------------------------------------
+* Reads from REFUGEE_RAW_DATA. The same files can also be fetched from
+* datalibweb's FDPRAW collection instead (see chapters/04-access.qmd,
+* requires the datalibweb Stata package + a registered token) — swap the
+* `use`/`merge...using` lines below for a datalibweb call if needed.
 local rawroot : env REFUGEE_RAW_DATA
-if "`rawsource'" == "local" & `"`rawroot'"' == "" {
+if `"`rawroot'"' == "" {
     di as error "Set REFUGEE_RAW_DATA to the raw-data root folder"
     exit 601
 }
@@ -35,9 +31,7 @@ local outdir : env FIFTYBY35_PROCESSED
 if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 
 * ---- household level ----------------------------------------------------
-get_raw_data, source(`rawsource') localpath(`"`rawroot'/Chad/household_TCD_2022.dta"') ///
-    country(TCD) years(2022) surveyid(TCD_2022_EHCVM_V01_M) ///
-    filename(household_TCD_2022.dta)
+use `"`rawroot'/Chad/household_TCD_2022.dta"', clear
 
 * welfare: HH nominal annual consumption (dtot), spatially deflated,
 * per capita, in LCU (XAF). welfare_type = 1 (consumption).
@@ -48,10 +42,7 @@ gen double welfare = (dtot/def_spa)/hhsize
 gen double welfare_self = (max(dtot - income_aid, 0)/def_spa)/hhsize
 
 * ---- merge individuals ---------------------------------------------------
-get_raw_data_path, source(`rawsource') localpath(`"`rawroot'/Chad/individual_TCD_2022.dta"') ///
-    country(TCD) years(2022) surveyid(TCD_2022_EHCVM_V01_M) ///
-    filename(individual_TCD_2022.dta)
-merge 1:m grappe menage using "`r(path)'"
+merge 1:m grappe menage using `"`rawroot'/Chad/individual_TCD_2022.dta"'
 keep if _merge==3
 drop _merge
 

@@ -18,13 +18,13 @@ if (rawroot == "") stop("Set REFUGEE_RAW_DATA to the raw-data root folder")
 # ---- parameters: pick ONE survey block -------------------------------------
 process_name <- "FDPRaw-data"
 
-survey_id <- "TCD_2022_EHCVM_V01_M"
-files <- file.path(rawroot, "Chad",
-                   c("household_TCD_2022.dta", "individual_TCD_2022.dta"))
+# survey_id <- "TCD_2022_EHCVM_V01_M"
+# files <- file.path(rawroot, "Chad",
+#                    c("household_TCD_2022.dta", "individual_TCD_2022.dta"))
 
-# survey_id <- "COL_2023_GEIH_V01_M"
-# files <- file.path(rawroot, "Colombia/GEIH",
-#                    c("household_data_2023.dta", "individual_data_2023.dta"))
+survey_id <- "COL_2023_GEIH_V01_M"
+files <- file.path(rawroot, "Colombia/GEIH",
+                   c("household_data_2023.dta", "individual_data_2023.dta"))
 
 # survey_id <- "UGA_2018_RHS_V01_M"
 # files <- file.path(rawroot, "Uganda", c("UGA_hh.dta", "UGA_ind.dta"))

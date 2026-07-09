@@ -158,7 +158,7 @@ library(primus)
 primus_query_transactions("FDPRaw-data", status = "pending")
 
 # inspect and download the files for review
-primus_transaction_details("039-000327173-LACRAW-COL-12944")
+primus_transaction_files("039-000327173-LACRAW-COL-12944")
 primus_download_data("039-000327173-LACRAW-COL-12944",
                      dest_dir = "c:/Temp/COL_2023_GEIH_V01_M")
 
