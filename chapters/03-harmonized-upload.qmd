@@ -12,9 +12,9 @@ Harmonized files are uploaded as a PRIMUS **transaction** using the `FDP-harmoni
 
 All harmonized files must pass validation checks before they can be uploaded to datalibweb. These confirm that the harmonized file conforms to the schema, and that mandatory variables are present and non-missing. Any deviation from the schema will trigger an error and prevent the harmonized file from being uploaded to datalibweb. They check for missing values in mandatory variables, for negative or zero values in `welfare` and `weight`, and that `welfare_self` is not greater than `welfare`. Households where `hhsize` differs from the number of `pid` records are flagged with a warning (rosters can be incomplete, and refugee-only samples keep a subset of household members). The validation scripts are `Stata/validate_50by35.do` and `R/validate_50by35.R` in this repository.
 
-A harmonized data upload starts with an **indicator `.xml`** file that opens the transaction and returns a transaction ID. The XML contains metadata about the harmonized file, the poverty headcount from `welfare`, and the **50by35 self-reliance share** computed from `welfare_self` at the $3.00/day 2021 PPP line — the values the reviewer approves. 
+A harmonized data upload starts with an **indicator `.xml`** file that opens the transaction and returns a transaction ID. The XML contains metadata about the harmonized file, the poverty headcount from `welfare`, and the **50by35 self-reliance share** computed from `welfare_self` at the *$3.00/day* 2021 PPP line (to be updated) — the values the reviewer approves. 
 
-PRIMUS leaves the XML's content to each team, provided it follows the `<PRIMUS_ANALYSIS>` heading format; both upload scripts in this repository write the same compact document.
+The XML's content can be customized, provided it follows the `<PRIMUS_ANALYSIS>` heading format; both upload scripts in this repository write the same compact document.
 
 ### CPI and PPP conversion factors {#sec-cpi-ppp}
 
@@ -44,8 +44,8 @@ Upload the code used to harmonize the raw data together with the harmonized data
 | `Data/Harmonized` | `dta` |
 :::
 
-These code examples are condensed; see the full scripts in this repository.
-}
+Note - the examples below are summaries, use the full scripts in this repository.
+
 
 ::: {.panel-tabset}
 
@@ -128,7 +128,7 @@ primus action, tranxid(`tranxid') proc(40) ///
 
 ## Reviewing & approving via PRIMUS
 
-Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. 
+Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status. Approvers can approve or reject the transaction. 
 
 Approved harmonized files are published to datalibweb and used to monitor the 50by35 self-reliance indicator. Rejected files are returned to the uploader for correction and resubmission.
 

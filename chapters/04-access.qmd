@@ -23,7 +23,7 @@ datalibweb survey identifiers guarantee replicability: versions are **never repl
 **Raw (master) data** in `FDPRAW`:
 
 ```
-CCC_YYYY_SSSS_V01_M
+CCC_YYYY_SSSS_V##_M
 ```
 
 - `CCC` — 3-letter ISO/WDI country code (e.g. `COL`)
@@ -34,13 +34,13 @@ CCC_YYYY_SSSS_V01_M
 **Harmonized data** in `FDP`:
 
 ```
-CCC_YYYY_SSSS_V01_M_V01_A_FDP
+CCC_YYYY_SSSS_V##_M_V##_A_FDP
 ```
 
 - `V##_A` — version of the harmonization (**adaptation**), independent of the master version
 - `FDP` — the collection of harmonized surveys
 
-**Module files** append the module name to the survey ID. The 50by35 harmonized welfare file for Colombia is:
+**Module files** append the module name to the survey ID. The 50by35 harmonized welfare file (V01) for Colombia is:
 
 ```
 COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta

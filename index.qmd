@@ -63,8 +63,7 @@ See the [Access Data](chapters/04-access.qmd) chapter for details.
 
 ## Harmonized Schema
 
-Every harmonized file must conform to the [50by35 schema](chapters/05-schema.qmd).
-The two variables required for calculating the 50by35 self-reliance indicator are:
+Every harmonized file must conform to the [50by35 schema](chapters/05-schema.qmd). Two variables in the microdata are used to calculate the 50by35 self-reliance indicator:
 
 | Variable | Status | Description |
 |---|---|---|
@@ -83,5 +82,4 @@ SR = \frac{\displaystyle\sum_{i=1}^{n} \mathbb{1}\left[\dfrac{\text{welfare\_sel
 $$
 
 where $z$ is the reference poverty line (in daily PPP terms), $\mathbb{1}[\cdot]$ is an indicator function equal to 1 if the condition holds and 0 otherwise, `welfare_self` is divided by 365 to convert the annual adjusted welfare aggregate to a daily rate, and the sums run over all $n$ individuals $i$ in the sample. CPI and PPP are the consumer price index and purchasing power parity adjustment factors, respectively, since `welfare_self` is expressed in current local currency units.
-
 

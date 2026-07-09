@@ -27,7 +27,7 @@ Upload the survey **documentation and questionnaires** together with the raw dat
 | `Data/Stata` | `dta` |
 :::
 
-Users can interact with PRIMUS via the [web interface](https://primusuiprod.ase.worldbank.org) or programmatically using two clients: the [`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows) or the [`primus` R package](https://github.com/worldbank/primus-r) (cross-platform). Both call the same PRIMUS API; use whichever matches your harmonization workflow.
+Users can interact with PRIMUS via the [web interface](https://primusuiprod.ase.worldbank.org) or programmatically using the [`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows) or the [`primus` R package](https://github.com/worldbank/primus-r) (cross-platform). Both call the same PRIMUS API; use whichever matches your harmonization workflow.
 
 ::: {.panel-tabset}
 
@@ -143,7 +143,7 @@ primus register, token(<your datalibweb token>)
 
 ## Reviewing & approving via PRIMUS
 
-Once the uploader confirms the transaction, it is queued for review by users with approver status. Reviewers can approve or reject the transaction. If approved, the files are published to datalibweb and become available for harmonization. If rejected, the uploader is notified and can revise the files and resubmit.
+Once the uploader confirms the transaction, it is queued for review by users with approver status. Approvers can approve or reject the transaction. If approved, the files are published to datalibweb (and become available for harmonization). If rejected, the uploader is notified and can revise the files and resubmit.
 
 The raw files become the input to the [harmonization step](02-harmonization.qmd).
 
