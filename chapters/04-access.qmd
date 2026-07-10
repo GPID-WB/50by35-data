@@ -5,7 +5,7 @@ date: today
 
 ## Overview
 
-Approved files are distributed through **datalibweb**, in two collections (servers):
+Approved files are distributed through **datalibweb**, in two collections:
 
 | Collection | Content |
 |---|---|
@@ -14,7 +14,8 @@ Approved files are distributed through **datalibweb**, in two collections (serve
 
 The harmonized welfare module in the `FDP` collection is called **`WELF`**.
 
-Two clients are available: the [`datalibweb` Stata package](https://github.com/worldbank/datalibweb) and the [`dlw` R package](https://github.com/worldbank/dlw). Both require the World Bank intranet/VPN, permission to access the collections, and the same datalibweb token used by PRIMUS (valid 30 days, renewed on the datalibweb website).
+## Who can access data
+To access the data, users must be registered on datalibweb and have permission to access the `FDPRAW` and `FDP` collections. Access is set to private by default on datalibweb. Admin can change this to public, so that all datalibweb users can access it. Otherwise, each user needs to subscribe to access the datasets they need and be approved by admin. 
 
 ## File naming conventions
 
@@ -45,6 +46,30 @@ CCC_YYYY_SSSS_V##_M_V##_A_FDP
 ```
 COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta
 ```
+
+## Using datalibweb
+Two clients are available: the [`datalibweb` Stata package](https://github.com/worldbank/datalibweb) and the [`dlw` R package](https://github.com/worldbank/dlw). Both require the World Bank intranet/VPN, permission to access the collections, and the same datalibweb token used by PRIMUS (valid 30 days, renewed on the datalibweb website).
+
+### Authentication
+
+Register the datalibweb token (from the datalibweb website) once every 30 days:
+
+::: {.panel-tabset}
+
+## R
+
+```r
+dlw_set_token("<your datalibweb token>")   # stored in the system keyring
+```
+
+## Stata
+
+```stata
+datalibweb, token(<your datalibweb token>) version(2)
+```
+
+:::
+
 
 ## Checking the catalog
 
@@ -130,24 +155,5 @@ datalibweb, country(COL TCD UGA) years(2018 2022 2023) type(FDP) mod(WELF) clear
 
 :::
 
-## Authentication
-
-Register the datalibweb token (from the datalibweb website) once every 30 days:
-
-::: {.panel-tabset}
-
-## R
-
-```r
-dlw_set_token("<your datalibweb token>")   # stored in the system keyring
-```
-
-## Stata
-
-```stata
-datalibweb, token(<your datalibweb token>) version(2)
-```
-
-:::
 
 For citation guidance and further options (e.g. PPP conversion on load), see the `datalibweb` help file in Stata and the [datalibweb guidelines](https://github.com/worldbank/datalibweb); questions to the datalibweb team at `datalibweb@worldbank.org`.

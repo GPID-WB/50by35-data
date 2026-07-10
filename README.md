@@ -12,19 +12,16 @@ The rendered book is available at:
 | Folder/File | Purpose |
 |---|---|
 | `chapters/` | Book chapters as `.qmd` files |
-| `R/` | Shared R utility functions |
-| `Stata/` | Shared Stata do-files |
-| `data/raw/` | Raw data (not committed — see data access instructions) |
+| `R/` | R scripts and functions |
+| `Stata/` | Stata do-files |
+| `data/raw/` | Raw data (not committed) |
 | `data/processed/` | Processed/derived data (not committed) |
-| `_extensions/tachyons/` | Tachyons CSS Quarto extension |
 | `wiki/` | Contributor guides and documentation |
 | `.github/workflows/` | CI/CD pipeline for GitHub Pages |
 
 ## Quick Start for Contributors
 
-See the **[`wiki/contributing.md`](wiki/contributing.md)** file for full setup
-instructions, including how to install Quarto, R, Stata, and how to write and
-preview chapters.
+See the **[`wiki/contributing.md`](wiki/contributing.md)** file for full setup instructions, including how to install Quarto, R, Stata, and how to write and preview chapters.
 
 ## Prerequisites
 

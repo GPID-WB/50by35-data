@@ -135,9 +135,9 @@ primus action, tranxid(`tranxid') proc(40) ///
 
 ## Reviewing & approving via PRIMUS
 
-Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status. Approvers can approve or reject the transaction. 
+Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status for the `FDP-harmonized-data` process. For the harmonized data, first regional approvers review the transaction before it goes to global approvers. All approvers can approve or reject the transaction. If there is no concensus by global approvers, a user with "finalizer" status can make the final decision. 
 
-Approved harmonized files are published to datalibweb and used to monitor the 50by35 self-reliance indicator. Rejected files are returned to the uploader for correction and resubmission.
+If the transaction is rejected, the uploader is notified. If approved at all levels, the files are published to datalibweb for 50by35 monitoring.
 
 ::: {.callout-warning}
 ## Note
@@ -154,10 +154,7 @@ library(primus)
 # Check pending transactions for review
 primus_query_transactions("FDP-harmonized-data", status = "pending")
 
-# download the files and the indicator XML for review
-primus_download_data("040-000327173-LACHARM-COL-12945",
-                     dest_dir = "c:/Temp/COL_2023_GEIH_V01_M")
-primus_get_xml("040-000327173-LACHARM-COL-12945", out = "indicator.xml")
+primus_transaction_files(transaction_id)
 
 # Approve (or reject) the transaction
 primus_approve("040-000327173-LACHARM-COL-12945",

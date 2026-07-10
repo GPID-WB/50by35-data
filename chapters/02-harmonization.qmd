@@ -9,19 +9,30 @@ Once raw microdata is available on datalibweb, it is harmonized to the **50by35 
 
 ## Sample harmonization scripts
 
-Example harmonization scripts for three surveys are available in the `Stata/` folder of this repository. They are not intended to be used as-is, but illustrate the harmonization process and provide a starting point for writing survey-specific scripts:
+Example harmonization scripts covering 14 country/survey combinations are available in the `Stata/` folder of this repository. They are not intended to be used as-is, but illustrate the harmonization process and provide a starting point for writing survey-specific scripts:
 
-| Script | Survey | Welfare measure |
-|---|---|---|
-| `Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do` | Chad EHCVM 2022 | Consumption (spatially deflated) |
-| `Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do` | Colombia GEIH 2023 | Income (annualized from monthly) |
-| `Stata/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do` | Uganda Refugee & Host Communities HH Survey 2018 | Consumption (annualized from monthly) |
+| `code` | `year` | `survname` | Welfare type | Refugee definition | Assistance subtracted for `welfare_self` | Script |
+|---|---|---|---|---|---|---|
+| TCD | 2018 | EHCVM | Consumption | `pop_group` 1 (east/Sudan), 2 (south/CAR) | `income_aid` — HH-level annual aid income, netted out before deflation | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/TCD_2018_EHCVM_V01_M_V01_A_FDP_WELF.do) |
+| TCD | 2022 | EHCVM | Consumption | `pop_group` 1, 2, 6 (other countries) | `income_aid` — HH-level annual aid income, netted out before deflation | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/TCD_2022_EHCVM_V01_M_V01_A_FDP_WELF.do) |
+| NER | 2018 | EHCVM | Consumption | `pop_group` 1, 2, 3 | `income_aid` — HH-level annual aid income, netted out before deflation | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/NER_2018_EHCVM_V01_M_V01_A_FDP_WELF.do) |
+| COL | 2022 | GEIH | Income | Venezuelan migrants (`refugee==1`), excluding Colombia-born (`cbirth==170`) | `inc_transf_inst` — monthly HH institutional/government transfers, divided by `npersug` before netting out | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/COL_2022_GEIH_V01_M_V01_A_FDP_WELF.do) |
+| COL | 2023 | GEIH | Income | Venezuelan migrants (`refugee==1`), excluding Colombia-born (`cbirth==170`) | `inc_transf_inst` — monthly HH institutional/government transfers, divided by `npersug` before netting out | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/COL_2023_GEIH_V01_M_V01_A_FDP_WELF.do) |
+| UGA | 2018 | RHS | Consumption | `refugee_status==1` | None subtracted directly — source provides `cons_agg_less_aid` (consumption net of aid) already | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/UGA_2018_RHS_V01_M_V01_A_FDP_WELF.do) |
+| JOR | 2021, 2023 | VAF | Consumption | Syrian, urban (`Nationality==1`) or camp (`Nationality==2`) | None subtracted directly — source provides `pce_without_assistance` already | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/JOR_2021_VAF_V01_M_V01_A_FDP_WELF.do) |
+| LBN | 2023 | VASYR | Consumption | Syrian household head (`head_nationality==Syria`) | None subtracted directly — source provides `CAwosocialasst` (consumption net of social assistance) already | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/LBN_2023_VASYR_V01_M_V01_A_FDP_WELF.do) |
+| PSE | 2023 | PECS | Consumption | Registered Palestine refugees (`refugee==1`) | `cons_hh_n` vs. `cons_hh_n_noaid` — nominal with/without-aid ratio applied to the deflated welfare measure | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/PSE_2023_PECS_V01_M_V01_A_FDP_WELF.do) |
+| ETH | 2022 | SESRE | Consumption | `sample_type` 2 (out-of-camp) or 3 (in-camp) | None subtracted directly — source provides `total_exp_pre` (pre-assistance consumption) already | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/ETH_2022_SESRE_V01_M_V01_A_FDP_WELF.do) |
+| CRI | 2023 | ENAHO | Income | Nicaraguan-born (`lugnac==2`) | `timas_hh + ts_hh` — HH monthly assistance/subsidy transfers, netted out before the per-capita/PPP transformation | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/CRI_2023_ENAHO_V01_M_V01_A_FDP_WELF.do) |
+| CRI | 2024 | ENAHO | Income | Nicaraguan-born (`lugnac==2`) | `timas_hh + ts_hh` — HH monthly assistance/subsidy transfers, netted out before the per-capita/PPP transformation | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/CRI_2024_ENAHO_V01_M_V01_A_FDP_WELF.do) |
+| CMR | 2025 | FDS | Consumption | `pops==1` (refugees/asylum-seekers) | None subtracted directly — source provides `nom_cons_minus_aid` already | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/CMR_2025_FDS_V01_M_V01_A_FDP_WELF.do) |
+| CHL | 2022 | CASEN | Income | Mother's country Venezuela/Colombia/Haiti (`r1b_pais_esp_cod`) | `yaimcorh` — HH monthly assistance/subsidy income, netted out of total household income before the per-adult-equivalent transformation | [do-file](https://github.com/GPID-WB/50by35-data/blob/main/Stata/CHL_2022_CASEN_V01_M_V01_A_FDP_WELF.do) |
 
-Common conventions across all three:
+Common conventions across all scripts:
 
-- **Sample**: refugees only — the 50by35 monitoring population.
+- **Sample**: refugees only — the 50by35 monitoring population. Each script's comment header documents the survey-specific classification used (population group codes, nationality, birth country, etc.).
 - **`welfare`**: the survey's official welfare aggregate, converted to **annual per capita LCU**.
-- **`welfare_self`**: welfare net of humanitarian/social assistance (per capita, same periodicity and deflation as `welfare`), floored at zero. Where the source provides a net-of-aid aggregate directly (e.g. Uganda's `cons_agg_less_aid`), that is used. Confirm the final definition with the 50by35 methodology team.
+- **`welfare_self`**: welfare net of humanitarian/social assistance (per capita, same periodicity and deflation as `welfare`), floored at zero and capped at `welfare`. Where the source provides a net-of-aid aggregate directly (e.g. Uganda's `cons_agg_less_aid`), that is used; otherwise assistance is netted out of the underlying income/consumption components before the same per-capita/deflation/annualization transformation applied to `welfare`. Confirm the final definition with the 50by35 methodology team.
 - **Sentinel codes** (e.g. `age == 9999`) are converted to system missing.
 
 After harmonizing, check the file against the schema before upload:

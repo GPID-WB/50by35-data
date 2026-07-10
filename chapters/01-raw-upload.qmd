@@ -143,7 +143,7 @@ primus register, token(<your datalibweb token>)
 
 ## Reviewing & approving via PRIMUS
 
-Once the uploader confirms the transaction, it is queued for review by users with approver status. Approvers can approve or reject the transaction. If approved, the files are published to datalibweb (and become available for harmonization). If rejected, the uploader is notified and can revise the files and resubmit.
+Once the uploader confirms the transaction, it is queued for review by users with approver status for the `FDPRaw-data` process. Approvers can approve or reject the transaction. If approved, the files are published to datalibweb (and become available for harmonization). If rejected, the uploader is notified and can revise the files and resubmit.
 
 The raw files become the input to the [harmonization step](02-harmonization.qmd).
 
@@ -159,8 +159,6 @@ primus_query_transactions("FDPRaw-data", status = "pending")
 
 # inspect and download the files for review
 primus_transaction_files("039-000327173-LACRAW-COL-12944")
-primus_download_data("039-000327173-LACRAW-COL-12944",
-                     dest_dir = "c:/Temp/COL_2023_GEIH_V01_M")
 
 # Approve (or reject) the transaction
 primus_approve("039-000327173-LACRAW-COL-12944",
