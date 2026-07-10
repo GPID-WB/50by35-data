@@ -9,7 +9,8 @@ Output : ${FIFTYBY35_PROCESSED:-data/processed}/NER_2018_EHCVM_V01_M_V01_A_FDP_W
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
 replicability package (harmonized.do, Niger 2018 block).
-Sample: refugees only — pop_group 1, 2, 3. Hosts (4) are dropped.
+Sample: forcibly displaced only — pop_group 1 (displaced from Niger),
+2 (refugees from Mali), 3 (refugees from Nigeria). Hosts (4) are dropped.
 ===================================================================== */
 
 version 18
