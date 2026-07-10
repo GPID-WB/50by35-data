@@ -15,7 +15,13 @@ added: the source's replicability script left assistance/aid unused for
 this survey, but the welfare file directly provides a nominal
 consumption-net-of-aid variable (nom_cons_minus_aid) that this script
 applies through the same spatial/temporal deflation used for welfare.
-Sample: refugees/asylum-seekers only (pops==1). Hosts (pops==2) dropped.
+Sample: pops==1 ("Refugie/Demandeur d'asile"). Hosts (pops==2) dropped.
+CAUTION: pops==1 is a single combined code for refugees AND
+asylum-seekers — none of the raw files (welfare, basic infrastructure,
+individual) carry a variable that separates the two. Per the 50by35
+monitoring population (refugees only, no asylum-seekers/IDPs), this
+survey cannot currently be restricted further; flag to the methodology
+team before treating this file's totals as refugee-only.
 Welfare is CONSUMPTION (nom_cons, spatially/temporally deflated, per
 capita), consistent with the source's own poverty methodology.
 welfare_type = 1.

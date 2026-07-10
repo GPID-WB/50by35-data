@@ -9,8 +9,10 @@ Output : ${FIFTYBY35_PROCESSED:-data/processed}/NER_2018_EHCVM_V01_M_V01_A_FDP_W
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
 replicability package (harmonized.do, Niger 2018 block).
-Sample: forcibly displaced only — pop_group 1 (displaced from Niger),
-2 (refugees from Mali), 3 (refugees from Nigeria). Hosts (4) are dropped.
+Sample: refugees only — pop_group 2 (refugees from Mali), 3 (refugees
+from Nigeria). IDPs (1, "Displaced from Niger"), hosts (4), and
+Nigeriens (5) are dropped — the 50by35 monitoring population excludes
+internally displaced persons.
 ===================================================================== */
 
 version 18
@@ -46,8 +48,8 @@ merge 1:m grappe menage using `"`rawroot'/Niger/individual_NER_2018.dta"'
 keep if _merge==3
 drop _merge
 
-* refugees only
-keep if inlist(pop_group, 1, 2, 3)
+* refugees only — excludes IDPs (pop_group==1)
+keep if inlist(pop_group, 2, 3)
 
 * households without a consumption aggregate cannot conform to the schema
 qui count if missing(welfare)
