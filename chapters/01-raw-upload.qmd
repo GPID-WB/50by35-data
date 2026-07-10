@@ -29,6 +29,27 @@ Upload the survey **documentation and questionnaires** together with the raw dat
 
 Users can interact with PRIMUS via the [web interface](https://primusuiprod.ase.worldbank.org) or programmatically using the [`primus` Stata package](https://github.com/worldbank/primus-stata) (Windows) or the [`primus` R package](https://github.com/worldbank/primus-r) (cross-platform). Both call the same PRIMUS API; use whichever matches your harmonization workflow.
 
+
+### Authentication
+
+Both clients use the same **datalibweb token** (valid 30 days, renewed on the [datalibweb website](https://datalibweb2.worldbank.org)).
+
+::: {.panel-tabset}
+
+## R
+
+```r
+primus_set_token("<your datalibweb token>")
+```
+
+## Stata
+
+```stata
+primus register, token(<your datalibweb token>)
+```
+
+:::
+
 ::: {.panel-tabset}
 
 ## R
@@ -121,25 +142,6 @@ primus action, tranxid(`tranxid') proc(39) ///
 
 :::
 
-## Authentication
-
-Both clients use the same **datalibweb token** (valid 30 days, renewed on the [datalibweb website](https://datalibweb2.worldbank.org)).
-
-::: {.panel-tabset}
-
-## R
-
-```r
-primus_set_token("<your datalibweb token>")
-```
-
-## Stata
-
-```stata
-primus register, token(<your datalibweb token>)
-```
-
-:::
 
 ## Reviewing & approving via PRIMUS
 
