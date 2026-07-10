@@ -42,12 +42,12 @@ The **unit of observation** is the individual: one row per person, with househol
 | `welfare_type` | Welfare measure type | `byte` | `1`–`3` | Not allowed | `1` = Consumption, `2` = Income, `3` = Expenditure |
 | `weight` | Sampling weight | `double` | > 0 | Not allowed | Individual sampling/population weight |
 | `camp` | Camp/non-camp | `byte` | `0`/`1` | Allowed | `0` = Non-camp, `1` = Camp |
+| `urban` | Urban/rural | `byte` | `0`/`1` | Allowed | `0` = Rural, `1` = Urban |
 
 ## Optional Variables
 
 | Variable | Label | Type | Unit / range | Notes |
 |---|---|---|---|---|
-| `urban` | Urban/rural | `byte` | `0`/`1` | `0` = Rural, `1` = Urban |
 | `hhsize` | Household size | `int` | ≥ 1 | Number of household members |
 | `age` | Age | `double` | 0–120 years | Decimal allowed for children under 5 (per GMD 2.0); integer otherwise |
 | `male` | Sex | `byte` | `0`/`1` | `0` = Female, `1` = Male |

@@ -78,8 +78,8 @@ gen byte   welfare_type = 1
 * weight: HH weight already named `weight` in the household file
 
 gen byte camp = (Nationality==2)          // Syrian camp vs. Syrian urban
-gen byte urban = !camp                    // VAF has no separate urban/rural concept;
-                                           // non-camp Syrians are by definition urban here
+gen byte urban = .                        // VAF has no separate urban/rural concept
+                                           // (schema allows urban to be missing)
 
 * optional variables
 gen int    hhsize = householdsize
