@@ -1,18 +1,18 @@
 /* =====================================================================
-JOR_2021_VAF_V01_M_V01_A_FDP_WELF.do
+JOR_2023_VAF_V01_M_V01_A_FDP_WELF.do
 50by35 pipeline — Step 2: harmonize Jordan VAF (Vulnerability Assessment
-Framework) 2021 round to the 50by35 schema
+Framework) 2023 round to the 50by35 schema
 
 Inputs : $REFUGEE_RAW_DATA/Jordan/harmonize_household.dta
          $REFUGEE_RAW_DATA/Jordan/harmonize_individual.dta
          (or datalibweb's FDPRAW collection — see chapters/04-access.qmd)
-Output : ${FIFTYBY35_PROCESSED:-data/processed}/JOR_2021_VAF_V01_M_V01_A_FDP_WELF.dta
+Output : ${FIFTYBY35_PROCESSED:-data/processed}/JOR_2023_VAF_V01_M_V01_A_FDP_WELF.dta
 
 Variable construction follows the WB-UNHCR Refugee Welfare Report
 replicability package (harmonized.do, Jordan 2021/2023 block). The raw
 household/individual files pool both VAF rounds (2021 and 2023) in one
-file, distinguished by `year` — this script keeps only the 2021 round;
-see JOR_2023_VAF_V01_M_V01_A_FDP_WELF.do for the 2023 round.
+file, distinguished by `year` — this script keeps only the 2023 round;
+see JOR_2021_VAF_V01_M_V01_A_FDP_WELF.do for the 2021 round.
 Sample: Syrian refugees, urban (Nationality==1) and camp (Nationality==2).
 Non-Syrian refugees (Nationality==3) are dropped, consistent with the
 50by35 monitoring population (Syrian refugee response only). The VAF
@@ -42,7 +42,7 @@ if `"`outdir'"' == "" local outdir "~/Github/50by35-data/data/processed"
 use `"`rawroot'/Jordan/harmonize_household.dta"', clear
 
 * this round only: the raw file pools both 2021 and 2023
-keep if year==2021
+keep if year==2023
 
 * refugees only: Syrian nationality (urban or camp)
 keep if inlist(Nationality, 1, 2)
@@ -132,5 +132,5 @@ order code year survname hhid pid welfare welfare_type welfare_self weight ///
 
 isid hhid pid
 compress
-save "`outdir'/JOR_2021_VAF_V01_M_V01_A_FDP_WELF.dta", replace
-di as result "Saved `outdir'/JOR_2021_VAF_V01_M_V01_A_FDP_WELF.dta (`=_N' refugees)"
+save "`outdir'/JOR_2023_VAF_V01_M_V01_A_FDP_WELF.dta", replace
+di as result "Saved `outdir'/JOR_2023_VAF_V01_M_V01_A_FDP_WELF.dta (`=_N' refugees)"
