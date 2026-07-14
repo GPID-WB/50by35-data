@@ -27,9 +27,16 @@ The conversion factors used to calculate the indicator for the XML file come fro
 
 They enter the self-reliance indicator exactly as in the [formula on the home page](../index.qmd): `welfare_self` (annual per capita LCU at survey-year prices) is divided by 365 to get a daily value, by the survey-year CPI to convert to 2021 prices, and by the PPP factor to convert to 2021 PPP dollars, then compared with $z = \$3.00$ (**placeholder** value, pending confirmation from the 50by35 methodology team).
 
-::: {.callout-warning}
+::: {.callout-note}
 ## Surveys not in PIP
-PIP's CPI table only has values for country-years with a PIP survey. For surveys outside PIP (e.g. the Uganda 2018 refugee survey), the lookup fails; set the `cpi_override` parameter in the upload scripts to the ratio $CPI_{t}/CPI_{2021}$ computed from the national CPI series (e.g. WDI series `FP.CPI.TOTL`).
+PIP's CPI table only contains values for country-years with a PIP survey. For refugee surveys in years not covered by PIP, the upload scripts apply an automatic **CPI fallback** rather than stopping with an error:
+
+1. **Interpolation** — if the survey year falls between two years that do have CPI values, the scripts linearly interpolate between them. For example, Uganda 2018 is bracketed by the 2016 and 2019 PIP survey years, giving an interpolated value of $0.875 + \tfrac{2}{3}(0.967 - 0.875) \approx 0.936$.
+2. **Nearest year** — if the survey year is beyond the range of available PIP CPI values (e.g. a 2025 survey when PIP's latest value is 2023), the most recent available value is used as-is (flat extrapolation).
+
+The fallback method is recorded in the indicator XML's `Method` field (e.g. `Interpolated(CPI_2016=0.874967,CPI_2019=0.967133)` or `NearestYear(CPI_2023=1.140000)`) so reviewers can see exactly how the CPI was derived.
+
+If neither fallback is acceptable, set `cpi_override` in the upload script to the ratio $CPI_{t}/CPI_{2021}$ from the national CPI series (e.g. WDI series `FP.CPI.TOTL`). The override is recorded as `Method;ManualOverride` in the XML.
 :::
 
 For convenience, the validation checks, XML creation and upload steps are combined in one script per client — `Stata/03_upload_harmonized.do` and `R/03_upload_harmonized.R` in this repository — condensed below.
@@ -65,14 +72,24 @@ survey_id <- "COL_2023_GEIH_V01_M_V01_A_FDP"
 df <- read_dta(paste0("data/processed/", survey_id, "_WELF.dta"))
 validate_50by35(df)
 
-# 2. CPI / PPP conversion factors from PIP, pinned to the 2021 framework
-cpi <- get_aux("cpi", ppp_version = 2021)
-ppp <- get_aux("ppp", ppp_version = 2021)
-df$cpi2021 <- cpi$value[cpi$country_code == df$countrycode[1] &
-                        as.integer(as.character(cpi$year)) == df$year[1] &
-                        cpi$data_level == "national"]
-df$icp2021 <- ppp$value[ppp$country_code == df$countrycode[1] &
-                        ppp$data_level == "national"][1]
+ccode <- df$code[1]
+yr    <- df$year[1]
+
+# 2. CPI / PPP conversion factors from PIP, pinned to the 2021 framework.
+#    If no exact CPI match exists for this country-year, the script
+#    automatically falls back to linear interpolation between the two
+#    nearest PIP survey years (or the nearest single year at the edges).
+#    See @sec-cpi-ppp and R/03_upload_harmonized.R for details.
+cpi_table <- get_aux("cpi", ppp_version = 2021)
+cpi_exact <- cpi_table[cpi_table$country_code == ccode &
+                         as.integer(as.character(cpi_table$year)) == yr &
+                         cpi_table$data_level == "national", ]
+# exact match; for fallback logic see R/03_upload_harmonized.R
+cpi_value <- cpi_exact$value
+
+ppp_table <- get_aux("ppp", ppp_version = 2021)
+icp_value <- ppp_table$value[ppp_table$country_code == ccode &
+                               ppp_table$data_level == "national"][1]
 
 # 3. Compute the self-reliance share and write the indicator XML —
 #    see R/03_upload_harmonized.R for the XML writer, which follows the
@@ -80,7 +97,8 @@ df$icp2021 <- ppp$value[ppp$country_code == df$countrycode[1] &
 #    CDATA blocks, one CALCULATION per nParamSets).
 #    3.00 is a placeholder PPP line, pending confirmation from the
 #    50by35 methodology team.
-sr <- weighted.mean(df$welfare_self/365/df$cpi2021/df$icp2021 >= 3.00, df$weight)
+sr <- weighted.mean(df$welfare_self / 365 / cpi_value / icp_value >= 3.00,
+                    df$weight)
 
 # 4. The XML opens the transaction; then attach the data and programs
 up <- primus_upload("FDP-harmonized-data", survey_id, type = "harmonized",
@@ -135,7 +153,7 @@ primus action, tranxid(`tranxid') proc(40) ///
 
 ## Reviewing & approving via PRIMUS
 
-Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status for the `FDP-harmonized-data` process. For the harmonized data, first regional approvers review the transaction before it goes to global approvers. All approvers can approve or reject the transaction. If there is no concensus by global approvers, a user with "finalizer" status can make the final decision. 
+Once the uploader confirms the transaction to the harmonized collection, it is queued for review by users with approver status for the `FDP-harmonized-data` process. For the harmonized data, first regional approvers review the transaction before it goes to global approvers. All approvers can approve or reject the transaction. If there is no consensus by global approvers, a user with "finalizer" status can make the final decision to approve or reject. 
 
 If the transaction is rejected, the uploader is notified. If approved at all levels, the files are published to datalibweb for 50by35 monitoring.
 
