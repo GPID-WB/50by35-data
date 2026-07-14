@@ -65,17 +65,55 @@ year  <- df$year[1]
 # ---- CPI / PPP conversion factors from PIP, pinned to the 2021 framework ------
 # CPI: normalized to 1 in 2021, aligned to the survey fieldwork period.
 # PPP: ICP 2021 conversion factor (LCU per 2021 international $).
+
+# CPI fallback: interpolate or use nearest year when exact match unavailable
+get_cpi_fallback <- function(cpi_table, ccode, yr) {
+  cc <- cpi_table[cpi_table$country_code == ccode &
+                    cpi_table$data_level == "national" &
+                    !is.na(cpi_table$value), ]
+  if (nrow(cc) == 0) stop("PIP has no CPI data at all for ", ccode)
+
+  cc$yr_num <- as.integer(as.character(cc$year))
+  below <- cc[cc$yr_num <= yr, ]
+  above <- cc[cc$yr_num >= yr, ]
+
+  if (nrow(below) > 0 && nrow(above) > 0) {
+    lo <- below[which.max(below$yr_num), ]
+    hi <- above[which.min(above$yr_num), ]
+    if (lo$yr_num == hi$yr_num) {
+      return(list(value = lo$value, method = "EmbeddedCPI"))
+    }
+    frac <- (yr - lo$yr_num) / (hi$yr_num - lo$yr_num)
+    cpi_val <- lo$value + frac * (hi$value - lo$value)
+    method <- sprintf("Interpolated(CPI_%s=%.6f,CPI_%s=%.6f)",
+                      lo$yr_num, lo$value, hi$yr_num, hi$value)
+    return(list(value = cpi_val, method = method))
+  }
+
+  nearest <- cc[which.min(abs(cc$yr_num - yr)), ]
+  method <- sprintf("NearestYear(CPI_%s=%.6f)", nearest$yr_num, nearest$value)
+  return(list(value = nearest$value, method = method))
+}
+
+cpi_method <- "EmbeddedCPI"  # default; updated if fallback used
+
 if (is.na(cpi_override)) {
   cpi <- get_aux("cpi", ppp_version = 2021)
-  cpi <- cpi[cpi$country_code == ccode &
-               as.integer(as.character(cpi$year)) == year &
-               cpi$data_level == "national", ]
-  if (nrow(cpi) != 1 || is.na(cpi$value))
-    stop("PIP has no CPI for ", ccode, " ", year,
-         " (survey not in PIP?) — set cpi_override to CPI(", year,
-         ")/CPI(2021) from the national CPI series (e.g. WDI FP.CPI.TOTL)")
-  cpi_value <- cpi$value
-} else cpi_value <- cpi_override
+  cpi_exact <- cpi[cpi$country_code == ccode &
+                     as.integer(as.character(cpi$year)) == year &
+                     cpi$data_level == "national", ]
+  if (nrow(cpi_exact) == 1 && !is.na(cpi_exact$value)) {
+    cpi_value <- cpi_exact$value
+  } else {
+    fb <- get_cpi_fallback(cpi, ccode, year)
+    cpi_value  <- fb$value
+    cpi_method <- fb$method
+    message("CPI fallback: ", cpi_method)
+  }
+} else {
+  cpi_value <- cpi_override
+  cpi_method <- "ManualOverride"
+}
 
 if (is.na(ppp_override)) {
   ppp <- get_aux("ppp", ppp_version = 2021)
@@ -129,7 +167,7 @@ calc_headcount_cdata <- cdata_block(kv(
   Indicator   = "PovertyHeadcount",
   Variable    = "welfare",
   PovertyLine = sprintf("%.2f", zline),
-  Method      = "EmbeddedCPI",
+  Method      = cpi_method,
   CPIValue    = sprintf("%.6f", cpi_value),
   PPPValue    = sprintf("%.6f", icp_value),
   Value       = sprintf("%.6f", headcount)
@@ -139,7 +177,7 @@ calc_selfreliance_cdata <- cdata_block(kv(
   Indicator   = "SelfRelianceShare",
   Variable    = "welfare_self",
   PovertyLine = sprintf("%.2f", zline),
-  Method      = "EmbeddedCPI",
+  Method      = cpi_method,
   CPIValue    = sprintf("%.6f", cpi_value),
   PPPValue    = sprintf("%.6f", icp_value),
   Value       = sprintf("%.6f", sr_share)

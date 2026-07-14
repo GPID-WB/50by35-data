@@ -76,6 +76,9 @@ data/processed/*
 # Personal scratch space (not part of the book or pipeline)
 sandbox/
 
+# batch manifest csvs
+batch/*.csv
+
 # Stata batch-mode logs
 *.log
 
@@ -86,8 +89,9 @@ Thumbs.db
 /.quarto/
 **/*.quarto_ipynb
 
-# Claude AI
+# AI
 .claude/
+.posit/
 
 # Data files (Stata, SPSS, etc.) — never commit raw or processed microdata
 **/*.dta

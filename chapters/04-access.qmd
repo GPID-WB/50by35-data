@@ -15,7 +15,7 @@ Approved files are distributed through **datalibweb**, in two collections:
 The harmonized welfare module in the `FDP` collection is called **`WELF`**.
 
 ## Who can access data
-To access the data, users must be registered on datalibweb and have permission to access the `FDPRAW` and `FDP` collections. Access is set to private by default on datalibweb. Admin can change this to public, so that all datalibweb users can access it. Otherwise, each user needs to subscribe to access the datasets they need and be approved by admin. 
+To access the data, users must be registered on datalibweb and have permission to access the `FDPRAW` and `FDP` collections. Access is set to private by default on datalibweb. Each user needs to subscribe to access the datasets they need and be approved by admin. Admin can change access to public, so that all (internal) datalibweb users can access it without user level subscription. 
 
 ## File naming conventions
 
@@ -84,8 +84,8 @@ library(dlw)
 dlw_server_catalog()
 
 # what is in a collection
-dlw_server_catalog("FDPRAW")
 dlw_server_catalog("FDP")
+dlw_server_catalog("FDPRAW")
 
 # everything available for one country, across collections
 dlw_country_catalog("COL")
@@ -102,7 +102,7 @@ datalibweb
 
 * list what is available for a country-year in a collection; when raw
 * data is requested, datalibweb lists the individual files to pick from
-datalibweb, country(COL) years(2023) type(FDPRAW) clear
+datalibweb, country(COL) years(2023) type(FDP) clear
 ```
 
 :::
@@ -117,10 +117,12 @@ datalibweb, country(COL) years(2023) type(FDPRAW) clear
 library(dlw)
 
 # harmonized 50by35 welfare module (WELF) from the FDP collection
-df <- dlw_get_data(
+
+welf <- dlw_get_data(
   country_code = "COL",
   filename     = "COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta",
-  server       = "FDP"
+  server       = "FDP",
+  year         = 2023
 )
 
 # a raw file from the FDPRAW collection; year and survey (acronym) disambiguate
@@ -130,8 +132,9 @@ raw <- dlw_get_data(
   year         = 2023,
   survey       = "GEIH",
   filename     = "individual_data_2023.dta",
-  server       = "FDPRAW"
+  server       = "FDP"
 )
+
 ```
 
 ## Stata
@@ -142,18 +145,113 @@ raw <- dlw_get_data(
 datalibweb, country(COL) years(2023) type(FDP) mod(WELF) clear
 
 * pin specific vintages for replicability
-datalibweb, country(COL) years(2023) type(FDP) mod(WELF) ///
-    vermast(01) veralt(01) clear
+dlw, country(COL) years(2023) type(FDP) mod(WELF) verm(01) vera(01) survey(GEIH) clear
 
 * a raw file from the FDPRAW collection
 datalibweb, country(COL) years(2023) type(FDPRAW) ///
     surveyid(COL_2023_GEIH_V01_M) filename(individual_data_2023.dta) clear
 
-* several countries at once, appended
-datalibweb, country(COL TCD UGA) years(2018 2022 2023) type(FDP) mod(WELF) clear
 ```
 
 :::
 
+## Calculating SR indicators
+
+::: {.panel-tabset}
+
+## R
+
+```r
+library(dlw)
+library(pipr)
+
+# harmonized 50by35 welfare module (WELF) from the FDP collection
+
+welf <- dlw_get_data(
+  country_code = "COL",
+  filename     = "COL_2023_GEIH_V01_M_V01_A_FDP_WELF.dta",
+  server       = "FDP",
+  year         = 2023
+)
+
+# CPI and PPP conversion factors from PIP (public)
+cpi_pip <- get_aux("cpi", ppp_version = 2021)
+ppp_pip <- get_aux("ppp", ppp_version = 2021)
+
+# calculate SR indicator ----
+
+ccode <- welf$code[1]
+yr    <- welf$year[1]
+
+# CPI: ratio normalized to 1 in the PPP base year (2021), for the survey year
+cpi_value <- cpi_pip$value[cpi_pip$country_code == ccode &
+                             cpi_pip$year == yr &
+                             cpi_pip$data_level == "national"]
+
+# PPP: ICP 2021 conversion factor (LCU per international $)
+ppp_value <- ppp_pip$value[ppp_pip$country_code == ccode &
+                             ppp_pip$data_level == "national"]
+
+# poverty line in $/day 2021 PPP (placeholder — pending confirmation)
+zline <- 3.00
+
+# self-reliance share: weighted proportion above the line using welfare_self
+sr_share <- weighted.mean(
+  welf$welfare_self / 365 / cpi_value / ppp_value >= zline,
+  welf$weight
+)
+
+# poverty headcount: weighted proportion below the line using welfare
+headcount <- weighted.mean(
+  welf$welfare / 365 / cpi_value / ppp_value < zline,
+  welf$weight
+)
+
+sprintf("%s %d - Self-reliance share: %.4f  Headcount: %.4f ($%.2f/day 2021PPP)", ccode, yr, sr_share, headcount, zline)
+```
+
+## Stata
+
+```stata
+* harmonized 50by35 welfare module (WELF) from the FDP collection;
+* the latest master and harmonization versions are loaded by default
+datalibweb, country(COL) years(2023) type(FDP) mod(WELF) clear
+
+* calculate SR indicator
+local ccode = code[1]
+local year  = year[1]
+
+* CPI and PPP conversion factors from PIP (public)
+preserve
+pip tables, table(cpi) ppp_year(2021) clear
+keep if country_code=="`ccode'" & year==`year' & data_level=="national"
+local cpival = value[1]
+restore
+
+preserve
+pip tables, table(ppp) ppp_year(2021) clear
+keep if country_code=="`ccode'" & data_level=="national"
+local pppval = value[1]
+restore
+
+* poverty line in $/day 2021 PPP (placeholder — pending confirmation)
+local zline 3.00
+
+* self-reliance share: weighted proportion above the line using welfare_self
+gen byte _sr = (welfare_self/365/`cpival'/`pppval') >= `zline'
+qui sum _sr [aw=weight]
+local sr : di %9.6f r(mean)
+
+* poverty headcount: weighted proportion below the line using welfare
+gen byte _poor = (welfare/365/`cpival'/`pppval') < `zline'
+qui sum _poor [aw=weight]
+local hc : di %9.6f r(mean)
+
+drop _sr _poor
+di "`ccode' `year' - Self-reliance share: `sr'  Headcount: `hc' ($`zline'/day 2021PPP)"
+```
+
+:::
 
 For citation guidance and further options (e.g. PPP conversion on load), see the `datalibweb` help file in Stata and the [datalibweb guidelines](https://github.com/worldbank/datalibweb); questions to the datalibweb team at `datalibweb@worldbank.org`.
+

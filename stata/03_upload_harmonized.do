@@ -57,6 +57,7 @@ local year  = year[1]
 * ---- CPI / PPP conversion factors from PIP, pinned to the 2021 framework ---
 * CPI: normalized to 1 in 2021, aligned to the survey fieldwork period.
 * PPP: ICP 2021 conversion factor (LCU per 2021 international $).
+local cpimethod "EmbeddedCPI"
 preserve
 if mi(`cpi_override') {
     pip tables, table(cpi) ppp_year(2021) clear
@@ -65,15 +66,57 @@ if mi(`cpi_override') {
     else local cpivar value
     capture confirm variable data_level
     if !_rc keep if data_level=="national"
-    keep if country_code=="`ccode'" & year==`year'
-    if _N != 1 | mi(`cpivar'[1]) {
-        di as error "PIP has no CPI for `ccode' `year' (survey not in PIP?) — " ///
-            "set cpi_override to CPI(`year')/CPI(2021) from the national CPI series"
-        exit 498
+    keep if country_code=="`ccode'"
+    drop if mi(`cpivar')
+
+    * check for exact match
+    count if year==`year'
+    if r(N) == 1 {
+        qui sum `cpivar' if year==`year'
+        local cpival = r(mean)
     }
-    local cpival = `cpivar'[1]
+    else {
+        * fallback: interpolate or nearest year
+        if _N == 0 {
+            di as error "PIP has no CPI data at all for `ccode'"
+            exit 498
+        }
+        gen _yr = real(string(year))
+
+        * find bracketing years
+        qui sum _yr if _yr <= `year'
+        local lo_yr = r(max)
+        qui sum _yr if _yr >= `year'
+        local hi_yr = r(min)
+
+        if !mi(`lo_yr') & !mi(`hi_yr') & `lo_yr' != `hi_yr' {
+            * linear interpolation
+            qui sum `cpivar' if _yr == `lo_yr'
+            local lo_cpi = r(mean)
+            qui sum `cpivar' if _yr == `hi_yr'
+            local hi_cpi = r(mean)
+            local frac = (`year' - `lo_yr') / (`hi_yr' - `lo_yr')
+            local cpival = `lo_cpi' + `frac' * (`hi_cpi' - `lo_cpi')
+            local cpimethod "Interpolated(CPI_`lo_yr'=`: di %9.6f `lo_cpi'',CPI_`hi_yr'=`: di %9.6f `hi_cpi'')"
+            di as result "CPI fallback: `cpimethod'"
+        }
+        else {
+            * nearest year
+            gen _dist = abs(_yr - `year')
+            qui sum _dist
+            qui sum `cpivar' if _dist == r(min)
+            local cpival = r(mean)
+            qui sum _yr if _dist == r(min)
+            local near_yr = r(mean)
+            local cpimethod "NearestYear(CPI_`=int(`near_yr')'=`: di %9.6f `cpival'')"
+            di as result "CPI fallback: `cpimethod'"
+        }
+    }
 }
-else local cpival = `cpi_override'
+else {
+    local cpival = `cpi_override'
+    local cpimethod "ManualOverride"
+}
 
 if mi(`ppp_override') {
     pip tables, table(ppp) ppp_year(2021) clear
@@ -157,7 +200,7 @@ file write `fh' `"key;value"' _n
 file write `fh' `"Indicator;PovertyHeadcount"' _n
 file write `fh' `"Variable;welfare"' _n
 file write `fh' `"PovertyLine;`zline'"' _n
-file write `fh' `"Method;EmbeddedCPI"' _n
+file write `fh' `"Method;`cpimethod'"' _n
 file write `fh' `"CPIValue;`cpival'"' _n
 file write `fh' `"PPPValue;`pppval'"' _n
 file write `fh' `"Value;`=trim("`hc'")'"' _n
@@ -169,7 +212,7 @@ file write `fh' `"key;value"' _n
 file write `fh' `"Indicator;SelfRelianceShare"' _n
 file write `fh' `"Variable;welfare_self"' _n
 file write `fh' `"PovertyLine;`zline'"' _n
-file write `fh' `"Method;EmbeddedCPI"' _n
+file write `fh' `"Method;`cpimethod'"' _n
 file write `fh' `"CPIValue;`cpival'"' _n
 file write `fh' `"PPPValue;`pppval'"' _n
 file write `fh' `"Value;`=trim("`sr'")'"' _n
