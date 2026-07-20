@@ -27,7 +27,7 @@ The conversion factors used to calculate the indicator for the XML file come fro
 
 They enter the self-reliance indicator exactly as in the [formula on the home page](../index.qmd): `welfare_self` (annual per capita LCU at survey-year prices) is divided by 365 to get a daily value, by the survey-year CPI to convert to 2021 prices, and by the PPP factor to convert to 2021 PPP dollars, then compared with $z = \$3.00$ (**placeholder** value, pending confirmation from the 50by35 methodology team).
 
-::: {.callout-note}
+::: {.callout-warning}
 ## Surveys not in PIP
 PIP's CPI table only contains values for country-years with a PIP survey. For refugee surveys in years not covered by PIP, the upload scripts apply an automatic **CPI fallback** rather than stopping with an error:
 
