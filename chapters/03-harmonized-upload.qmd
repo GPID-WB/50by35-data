@@ -56,7 +56,7 @@ Upload the code used to harmonize the raw data together with the harmonized data
 Note - the examples below are summaries, use the full scripts in this repository.
 
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 
@@ -162,7 +162,7 @@ If the transaction is rejected, the uploader is notified. If approved at all lev
 A transaction cannot be approved or rejected more than once, and the action cannot be changed once it goes through.
 :::
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 

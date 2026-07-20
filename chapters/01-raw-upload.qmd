@@ -34,7 +34,7 @@ Users can interact with PRIMUS via the [web interface](https://primusuiprod.ase.
 
 Both clients use the same **datalibweb token** (valid 30 days, renewed on the [datalibweb website](https://datalibweb2.worldbank.org)).
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 
@@ -50,7 +50,7 @@ primus register, token(<your datalibweb token>)
 
 :::
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 
@@ -149,7 +149,7 @@ Once the uploader confirms the transaction, it is queued for review by users wit
 
 The raw files become the input to the [harmonization step](02-harmonization.qmd).
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 

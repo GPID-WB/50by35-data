@@ -38,7 +38,7 @@ Common conventions across all scripts:
 
 After harmonizing, check the file against the schema before upload:
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 

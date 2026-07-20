@@ -54,7 +54,7 @@ Two clients are available: the [`datalibweb` Stata package](https://github.com/w
 
 Register the datalibweb token (from the datalibweb website) once every 30 days:
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 
@@ -73,7 +73,7 @@ datalibweb, token(<your datalibweb token>) version(2)
 
 ## Checking the catalog
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 
@@ -109,7 +109,7 @@ datalibweb, country(COL) years(2023) type(FDP) clear
 
 ## Loading data
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 
@@ -157,7 +157,7 @@ datalibweb, country(COL) years(2023) type(FDPRAW) ///
 
 ## Calculating SR indicators
 
-::: {.panel-tabset}
+::: {.panel-tabset group="language"}
 
 ## R
 
